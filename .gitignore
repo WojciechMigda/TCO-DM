@@ -4,3 +4,9 @@ CMakeScripts
 Makefile
 cmake_install.cmake
 install_manifest.txt
+.cproject
+.project
+*.swp
+main
+src/submission.cpp
+src/submission.o
