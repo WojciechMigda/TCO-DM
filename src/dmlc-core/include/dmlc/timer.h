@@ -7,7 +7,8 @@
 #ifndef DMLC_TIMER_H_
 #define DMLC_TIMER_H_
 
-#include <time.h>
+#include <chrono>
+//#include <time.h>
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
@@ -30,9 +31,10 @@ inline double GetTime(void) {
   return static_cast<double>(mts.tv_sec) + static_cast<double>(mts.tv_nsec) * 1e-9;
   #else
   #if defined(__unix__) || defined(__linux__)
-  timespec ts;
-  CHECK(clock_gettime(CLOCK_REALTIME, &ts) == 0) << "failed to get time";
-  return static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1e-9;
+//  timespec ts;
+//  CHECK(clock_gettime(CLOCK_REALTIME, &ts) == 0) << "failed to get time";
+//  return static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1e-9;
+  return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   #else
   return static_cast<double>(time(NULL));
   #endif
