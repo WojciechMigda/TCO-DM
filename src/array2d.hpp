@@ -36,6 +36,7 @@
 #include <sstream>
 #include <type_traits>
 #include <unordered_set>
+#include <vector>
 
 namespace num
 {
@@ -71,6 +72,8 @@ public:
     std::slice_array<value_type> operator[](std::slice slicearr);
     std::valarray<value_type> operator[](const std::gslice & gslicearr) const;
     std::gslice_array<value_type> operator[](const std::gslice & gslicearr);
+
+    std::vector<value_type> tovector() const;
 
 private:
     shape_type m_shape;
@@ -336,6 +339,18 @@ loadtxt(
     }
 
     return result;
+}
+
+template<typename _Type>
+inline
+std::vector<_Type>
+array2d<_Type>::tovector(void) const
+{
+    std::vector<_Type> vec(m_shape.first * m_shape.second);
+
+    std::copy(std::begin(m_varray), std::end(m_varray), vec.begin());
+
+    return vec;
 }
 
 } // namespace num
