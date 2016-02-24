@@ -59,11 +59,12 @@ public:
     typedef std::valarray<value_type> varray_type;
 
     array2d(shape_type shape, value_type initializer);
+    array2d(shape_type shape, varray_type && varray);
 
     shape_type shape(void) const;
 
     std::slice row(size_type n) const;
-    std::slice column(size_type n) const;
+    std::slice column(int n) const;
     std::slice stripe(size_type n, enum Axis axis) const;
 
     std::gslice columns(int p, int q) const;
@@ -92,6 +93,16 @@ array2d<_Type>::array2d(shape_type shape, array2d<_Type>::value_type initializer
 
 template<typename _Type>
 inline
+array2d<_Type>::array2d(shape_type shape, varray_type && varray)
+:
+    m_shape(shape),
+    m_varray(varray)
+{
+
+}
+
+template<typename _Type>
+inline
 shape_type
 array2d<_Type>::shape(void) const
 {
@@ -109,9 +120,16 @@ array2d<_Type>::row(size_type n) const
 template<typename _Type>
 inline
 std::slice
-array2d<_Type>::column(size_type n) const
+array2d<_Type>::column(int n) const
 {
-    return std::slice(n, m_shape.first, m_shape.second);
+    if (n < 0)
+    {
+        return std::slice(m_shape.second + n, m_shape.first, m_shape.second);
+    }
+    else
+    {
+        return std::slice(n, m_shape.first, m_shape.second);
+    }
 }
 
 template<typename _Type>
@@ -121,12 +139,12 @@ array2d<_Type>::columns(int p, int q) const
 {
     if (p < 0)
     {
-        assert(-p < m_shape.second);
+        assert(-p < (int)m_shape.second);
         p = m_shape.second + p;
     }
     if (q < 0)
     {
-        assert(-q < m_shape.second);
+        assert(-q < (int)m_shape.second);
         q = m_shape.second + q;
     }
 
