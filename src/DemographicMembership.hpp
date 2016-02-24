@@ -35,24 +35,31 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
+#include <cstring>
+#include <iterator>
 
 typedef float real_type;
 
 
+/*
+ * Wrapper which returns DMatrixHandle directly and not through out param
+ */
 DMatrixHandle XGDMatrixCreateFromMat(
     const float *data,
     bst_ulong nrow,
     bst_ulong ncol,
-    float  missing)
+    float missing)
 {
-    DMatrixHandle dmat;
+    DMatrixHandle dmat{nullptr};
 
     XGDMatrixCreateFromMat(data, nrow, ncol, missing, &dmat);
 
     return dmat;
 }
 
-
+/*
+ * Competition mandated class
+ */
 struct DemographicMembership
 {
     enum TestType
@@ -70,6 +77,90 @@ struct DemographicMembership
         std::vector<std::string> & i_testing) const;
 };
 
+/*
+ * NA/numeric converter for loadtxt
+ */
+auto na_xlt = [](const char * str) -> real_type
+{
+    return (std::strcmp(str, "NA") == 0) ? NAN : std::strtod(str, nullptr);
+};
+
+/*
+ * GENDER converter for loadtxt
+ */
+auto gender_xlt = [](const char * str) -> real_type
+{
+    if (strcmp(str, "U") == 0)
+    {
+        return NAN;
+    }
+    else if (strcmp(str, "M") == 0)
+    {
+        return 0.;
+    }
+    else if (strcmp(str, "F") == 0)
+    {
+        return 1.;
+    }
+    else
+    {
+        assert(false);
+        return NAN;
+    }
+};
+
+/*
+ * generic Y/N/NA converter for loadtxt
+ */
+auto yes_no_xlt = [](const char * str) -> real_type
+{
+    if (strcmp(str, "NA") == 0)
+    {
+        return NAN;
+    }
+    else if (strcmp(str, "Y") == 0)
+    {
+        return 0.;
+    }
+    else if (strcmp(str, "N") == 0)
+    {
+        return 1.;
+    }
+    else
+    {
+        assert(false);
+        return NAN;
+    }
+};
+
+/*
+ * generic pattern converter for loadtxt
+ */
+auto from_list_xlt = [](const std::vector<std::string> & patterns, const char * str) -> real_type
+{
+    auto matched_it = std::find_if(patterns.cbegin(), patterns.cend(),
+        [&str](const std::string & what)
+        {
+            return strcmp(what.c_str(), str) == 0;
+        }
+    );
+
+    if (matched_it != patterns.cend())
+    {
+        return std::distance(patterns.cbegin(), matched_it);
+    }
+    else if (strcmp(str, "NA") == 0)
+    {
+        return NAN;
+    }
+    else
+    {
+        assert(false);
+        return NAN;
+    }
+};
+
+
 
 std::vector<int>
 DemographicMembership::predict(const int test_type,
@@ -83,35 +174,95 @@ DemographicMembership::predict(const int test_type,
 
     std::cerr << "predict(): test_type: " << test_type << std::endl;
 
+    static const std::vector<std::string> REGISTRATION_ROUTE_PATTERNS{{"A", "B", "C", "D"}};
+    static const std::vector<std::string> REGISTRATION_CONTEXT_PATTERNS{
+        {
+            "A", "B", "C", "D", "E", "F", "G", "H",
+            "I", "J", "K", "L", "M", "N", "O", "P",
+            "Q", "R", "S", "T", "U", "V", "W", "X",
+            "Y", "Z", "0", "1", "2", "3"
+        }};
+    static const std::vector<std::string> MIGRATED_USER_PATTERNS{{"A", "B", "C", "D", "E"}};
 
-    // ;
+    const num::loadtxtCfg<real_type>::converters_type converters =
+        {
+            {1, na_xlt}, // AGE
+            {5, na_xlt}, // REGISTRATION_DAYS
+            {232, na_xlt}, // PLATFORM_CENTRE
+            {233, na_xlt}, // TOD_CENTRE
+            {234, na_xlt}, // CONTENT_CENTRE
+            {235, na_xlt}, // INTEREST_BEAUTY
+            {236, na_xlt}, // INTEREST_TECHNOLOGY
+            {237, na_xlt}, // INTEREST_FASHION
+            {238, na_xlt}, // INTEREST_COOKING
+            {239, na_xlt}, // INTEREST_HOME
+            {240, na_xlt}, // INTEREST_QUALITY
+            {241, na_xlt}, // INTEREST_DEALS
+            {242, na_xlt}, // INTEREST_GREEN
+            // ---------------------------------------------------------
+            {2, gender_xlt}, // GENDER
+            {3, [](const char * str){return from_list_xlt(REGISTRATION_ROUTE_PATTERNS, str);}}, // REGISTRATION_ROUTE
+            {4, [](const char * str){return from_list_xlt(REGISTRATION_CONTEXT_PATTERNS, str);}}, // REGISTRATION_CONTEXT
+            {6, yes_no_xlt}, // OPTIN
+            {7, yes_no_xlt}, // IS_DELETED
+            {8, [](const char * str){return from_list_xlt(MIGRATED_USER_PATTERNS, str);}}, // MIGRATED_USER_TYPE
+            {9, yes_no_xlt}, // SOCIAL_AUTH_FACEBOOK
+            {10, yes_no_xlt}, // SOCIAL_AUTH_TWITTER
+            {11, yes_no_xlt}, // SOCIAL_AUTH_GOOGLE
+        };
+
     array_type i_train_data =
         num::loadtxt(
             std::move(i_training),
             std::move(
                 num::loadtxtCfg<real_type>()
                 .delimiter(',')
-//                .converters({{-1, na_xlt}})
-//                .use_cols(std::set<std::size_type>())
+                .converters(num::loadtxtCfg<real_type>::converters_type{converters})
             )
         );
-    std::cerr << i_train_data.shape() << std::endl;
 
+    const
+    array_type i_test_data =
+        num::loadtxt(
+            std::move(i_testing),
+            std::move(
+                num::loadtxtCfg<real_type>()
+                .delimiter(',')
+                .converters(num::loadtxtCfg<real_type>::converters_type{converters})
+            )
+        );
 
+    // retrieve response vector
+    const array_type::varray_type train_y_va = i_train_data[i_train_data.column(-1)];
+    const std::vector<float> train_y(std::begin(train_y_va), std::end(train_y_va));
+
+    std::cerr << "train_y size: " << train_y.size() << std::endl;
+//    std::copy(train_y.cbegin(), train_y.cbegin() + 10, std::ostream_iterator<real_type>(std::cerr, ", "));
+//    std::cout << std::endl;
+
+    // drop the CONSUMER_ID column
+    const array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 1}, i_train_data[i_train_data.columns(1, -1)]);
+    const array_type test_data({i_test_data.shape().first, i_test_data.shape().second - 1}, i_test_data[i_test_data.columns(1, -1)]);
+
+    std::cerr << "train_data shape: " << train_data.shape() << std::endl;
+    std::cerr << "test_data shape: " << test_data.shape() << std::endl;
 
     // prepare placeholder for raw matrix later used by xgboost
-    auto tr_mat = i_train_data.tovector();
-    std::cout << tr_mat.size() << std::endl;
+    std::vector<float> train_vec = train_data.tovector();
+    std::cout << train_vec.size() << std::endl;
+
+//    std::copy(train_vec.cbegin(), train_vec.cbegin() + 10, std::ostream_iterator<real_type>(std::cerr, ", "));
+//    std::cout << std::endl;
 
     std::unique_ptr<void, int (*)(DMatrixHandle)> tr_dmat(
         XGDMatrixCreateFromMat(
-            tr_mat.data(),
-            i_train_data.shape().first,
-            i_train_data.shape().second, NAN),
+            train_vec.data(),
+            train_data.shape().first,
+            train_data.shape().second, NAN),
         XGDMatrixFree);
 
 
-    return std::vector<int>(i_testing.size());
+    return std::vector<int>(i_testing.size(), 1);
 }
 
 #endif /* DEMOGRAPHICMEMBERSHIP_HPP_ */
