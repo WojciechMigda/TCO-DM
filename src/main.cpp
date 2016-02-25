@@ -77,10 +77,15 @@ int main(int argc, char **argv)
     std::cerr << "After split train data has " << train_data.size() << " rows" << std::endl;
     std::cerr << "After split test data has " << test_data.size() << " rows" << std::endl;
 
-    // remove response from test data
+    // remove response from test data and append it to test_y
+    std::vector<int> test_y;
     for (auto  & s : test_data)
     {
-        s.resize(s.rfind(','));
+        auto pos = s.rfind(',');
+
+        test_y.push_back(s[pos + 1] - '0');
+
+        s.resize(pos);
     }
 
 
@@ -89,9 +94,25 @@ int main(int argc, char **argv)
 
     const DemographicMembership solver;
 
-    auto result = solver.predict(
+    const auto y_hat = solver.predict(
         DemographicMembership::TestType::Local,
         train_data, test_data);
+
+    const float TP = std::accumulate(test_y.cbegin(), test_y.cend(), 0);
+    std::cerr << "TP: " << TP << std::endl;
+    const float FP = std::inner_product(test_y.cbegin(), test_y.cend(), y_hat.cbegin(), 0,
+        [](int a, int b){return a + b;},
+        [](int a, int b){return a == 0 && b == 1;}
+    );
+    std::cerr << "FP: " << FP << std::endl;
+    const float FN = std::inner_product(test_y.cbegin(), test_y.cend(), y_hat.cbegin(), 0,
+        [](int a, int b){return a + b;},
+        [](int a, int b){return a == 1 && b == 0;}
+    );
+    std::cerr << "FN: " << FN << std::endl;
+
+    std::cerr << "Precision: " << TP / (TP + FP) << std::endl;
+    std::cerr << "Recall: " << TP / (TP + FN) << std::endl;
 
     return 0;
 }
