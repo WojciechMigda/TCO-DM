@@ -17,7 +17,6 @@ add_definitions( -O2 -ggdb -std=c++11 -Wall -pedantic )
 #add_definitions( -O2 -ffast-math -fno-finite-math-only  -msse2 -march=native -std=c++11 -Wall -g -pedantic )
 #add_definitions( -O2 -ftree-vectorize -ffast-math -fno-finite-math-only  -msse2 -march=native -std=c++11 -Wall -g -pedantic )
 #add_definitions( -O3 -ffast-math -msse2 -march=native -std=c++11 -Wall -g -pedantic )
-#add_definitions( -O2 -std=c++0x -ggdb -D__GXX_EXPERIMENTAL_CXX0X__ )
 
 ################################################################################
 
