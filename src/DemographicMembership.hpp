@@ -37,6 +37,7 @@
 #include <cmath>
 #include <cstring>
 #include <iterator>
+#include <unordered_map>
 
 typedef float real_type;
 
@@ -55,6 +56,18 @@ DMatrixHandle XGDMatrixCreateFromMat(
     XGDMatrixCreateFromMat(data, nrow, ncol, missing, &dmat);
 
     return dmat;
+}
+
+/*
+ * Wrapper which returns BoosterHandle directly and not through out param
+ */
+BoosterHandle XGBoosterCreate(const DMatrixHandle dmats[], bst_ulong len)
+{
+    BoosterHandle booster{nullptr};
+
+    XGBoosterCreate(dmats, len, &booster);
+
+    return booster;
 }
 
 /*
@@ -161,7 +174,6 @@ auto from_list_xlt = [](const std::vector<std::string> & patterns, const char * 
 };
 
 
-
 std::vector<int>
 DemographicMembership::predict(const int test_type,
     std::vector<std::string> & i_training,
@@ -238,21 +250,78 @@ DemographicMembership::predict(const int test_type,
 
     std::cerr << "train_y size: " << train_y.size() << std::endl;
 //    std::copy(train_y.cbegin(), train_y.cbegin() + 10, std::ostream_iterator<real_type>(std::cerr, ", "));
-//    std::cout << std::endl;
+//    std::cerr << std::endl;
 
     // drop the CONSUMER_ID column
-    const array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 1}, i_train_data[i_train_data.columns(1, -1)]);
     const array_type test_data({i_test_data.shape().first, i_test_data.shape().second - 1}, i_test_data[i_test_data.columns(1, -1)]);
+    // drop the CONSUMER_ID and DEMO_X columns
+    const array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 2}, i_train_data[i_train_data.columns(1, -2)]);
 
     std::cerr << "train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "test_data shape: " << test_data.shape() << std::endl;
 
+
+    // train
+    {
+
+
+        // XGBClassifier.__init__
+        ; // No-op
+
+        // XGBClassifier.fit
+#if 0
+        // _init_from_npy2d
+        _LIB.XGDMatrixCreateFromMat(data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+                                                        mat.shape[0], mat.shape[1],
+                                                        ctypes.c_float(missing),
+                                                        ctypes.byref(self.handle))
+        XGDMatrixCreateFromMat(float *, 6423, 242, nan, &handle);
+
+        // set_float_info("label", int64[6423])
+        _LIB.XGDMatrixSetFloatInfo(self.handle,
+                                                       c_str(field),
+                                                       c_array(ctypes.c_float, data),
+                                                       len(data))
+        XGDMatrixSetFloatInfo(handle, "label", float *, 6423)
+
+        // train()
+        // Booster.__init__
+        // cache to 1-elementowa lista dtrain, drugi argument train()
+        _LIB.XGBoosterCreate(dmats, len(cache), ctypes.byref(self.handle))
+        XGBoosterCreate(void * /* 1-elem array of DMat handles*/), 1, &handle)
+
+        _LIB.XGBoosterSetParam(self.handle, c_str(key), c_str(str(val)))
+        XGBoosterSetParam(booster handle, "seed", "0")
+        for pair in params:
+            XGBoosterSetParam(...)
+
+        // update()
+        // LOOP
+        _LIB.XGBoosterUpdateOneIter(self.handle, iteration, dtrain.handle)
+        XGBoosterUpdateOneIter(booster handle, 0..N, dtrain handle)
+
+#endif
+
+        // XGBClassifier.predict
+#if 0
+        _LIB.XGDMatrixCreateFromMat(data.ctypes.data_as(ctypes.POINTER(ctypes.c_float)),
+                                                        mat.shape[0], mat.shape[1],
+                                                        ctypes.c_float(missing),
+                                                        ctypes.byref(self.handle))
+        XGDMatrixCreateFromMat(float *, 1606, 242, nan, &handle);
+
+        _LIB.XGBoosterPredict(self.handle, data.handle,
+                                                      option_mask, ntree_limit,
+                                                      ctypes.byref(length),
+                                                      ctypes.byref(preds))
+        XGBoosterPredict(booster handle, dmat handle, 0, 0, &length, &preds)
+#endif
+        // XGBoosterFree(self.handle)
+    }
+
     // prepare placeholder for raw matrix later used by xgboost
     std::vector<float> train_vec = train_data.tovector();
-    std::cout << train_vec.size() << std::endl;
-
-//    std::copy(train_vec.cbegin(), train_vec.cbegin() + 10, std::ostream_iterator<real_type>(std::cerr, ", "));
-//    std::cout << std::endl;
+    std::cerr << "train_vec size: " << train_vec.size() << std::endl;
 
     std::unique_ptr<void, int (*)(DMatrixHandle)> tr_dmat(
         XGDMatrixCreateFromMat(
@@ -261,8 +330,74 @@ DemographicMembership::predict(const int test_type,
             train_data.shape().second, NAN),
         XGDMatrixFree);
 
+    std::vector<float> test_vec = test_data.tovector();
+    std::cerr << "test_vec size: " << test_vec.size() << std::endl;
 
-    return std::vector<int>(i_testing.size(), 1);
+    std::unique_ptr<void, int (*)(DMatrixHandle)> te_dmat(
+        XGDMatrixCreateFromMat(
+            test_vec.data(),
+            test_data.shape().first,
+            test_data.shape().second, NAN),
+        XGDMatrixFree);
+
+    // attach response vector to tr_dmat
+    XGDMatrixSetFloatInfo(tr_dmat.get(), "label", train_y.data(), train_y.size());
+
+    const DMatrixHandle cache[] = {tr_dmat.get()};
+
+    // create Booster with attached tr_dmat
+    std::unique_ptr<void, int (*)(BoosterHandle)> booster(
+            XGBoosterCreate(cache, 1UL),
+            XGBoosterFree);
+
+    // configure booster
+    const std::map<const std::string, const std::string> params
+    {
+        {"reg_alpha", "0"},
+        {"colsample_bytree", "0.67"},
+        {"silent", "0"},
+        {"colsample_bylevel", "1"},
+        {"scale_pos_weight", "1"},
+        {"learning_rate", "0.045"},
+        {"missing", "nan"},
+        {"max_delta_step", "0"},
+        {"base_score", "0.5"},
+        {"n_estimators", "500"},
+        {"subsample", "0.9"},
+        {"reg_lambda", "1"},
+        {"seed", "0"},
+        {"min_child_weight", "65"},
+        {"objective", "rank:pairwise"},
+        {"max_depth", "7"},
+        {"gamma", "0"}
+    };
+    for (const auto & kv : params)
+    {
+        std::cerr << kv.first << " => " << kv.second << std::endl;
+        XGBoosterSetParam(booster.get(), kv.first.c_str(), kv.second.c_str());
+    }
+
+    for (int iter{0}; iter < 500; ++iter)
+    {
+        XGBoosterUpdateOneIter(booster.get(), iter, tr_dmat.get());
+    }
+
+    bst_ulong y_hat_len{0};
+    const float * y_hat_proba{nullptr};
+    XGBoosterPredict(booster.get(), te_dmat.get(), 0, 0, &y_hat_len, &y_hat_proba);
+    std::cerr << "Got y_hat_proba of length " << y_hat_len << std::endl;
+
+    std::vector<int> y_hat(test_data.shape().first);
+    std::transform(y_hat_proba, y_hat_proba + y_hat_len, y_hat.begin(),
+        [](const float what)
+        {
+            return what > 0.5;
+        }
+    );
+
+
+//    return std::vector<int>(i_testing.size(), 1);
+    return y_hat;
 }
 
 #endif /* DEMOGRAPHICMEMBERSHIP_HPP_ */
