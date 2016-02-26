@@ -221,7 +221,9 @@ def scirpus_error(preds, dtrain):
     from numpy import mean
     return 'error', mean(error)
 
-
+NOMINALS = ['GENDER', 'REGISTRATION_ROUTE', 'REGISTRATION_CONTEXT',
+            'MIGRATED_USER_TYPE', 'PLATFORM_CENTRE', 'TOD_CENTRE',
+            'CONTENT_CENTRE']
 
 def work(out_csv_file,
          estimator,
@@ -254,12 +256,14 @@ def work(out_csv_file,
 
         missing = isnull(train_X[col])
 
-        train_X[col] = factorize(train_X[col])[0]
+        train_X[col] = factorize(train_X[col])[0] ## NANs become -1
         train_X[col][missing] = float('nan')
 
         from numpy import isnan
         print("NANs after factorization", sum(train_X[col].apply(isnan)))
         pass
+
+    train_X = OneHot(train_X, NOMINALS)
 
     from sklearn.cross_validation import StratifiedKFold
     from sklearn.grid_search import GridSearchCV
@@ -316,6 +320,14 @@ grid scores:
   mean: 788739.11423, std: 952.60469, params: {'n_estimators': 500, 'subsample': 0.9, 'colsample_bytree': 0.67, 'max_depth': 7, 'min_child_weight': 50}
 best score: 789958.10747
 best params: {'n_estimators': 500, 'subsample': 0.9, 'colsample_bytree': 0.67, 'max_depth': 7, 'min_child_weight': 20}
+
+
+grid scores:
+  mean: 786388.90860, std: 906.72660, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 300, 'subsample': 0.9, 'objective': 'binary:logistic', 'max_depth': 7}
+  mean: 789050.88848, std: 1708.63378, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.9, 'objective': 'binary:logistic', 'max_depth': 7}
+  mean: 789454.57872, std: 2059.68811, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 700, 'subsample': 0.9, 'objective': 'binary:logistic', 'max_depth': 7}
+best score: 789454.57872
+best params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 700, 'subsample': 0.9, 'objective': 'binary:logistic', 'max_depth': 7}
 
 ======================================================
 rank:pairwise
@@ -379,13 +391,101 @@ best params: {'n_estimators': 500, 'subsample': 0.9, 'colsample_bytree': 0.67, '
 >>> 'max_depth': 7, 'min_child_weight': 65
     """
 
+    """  ONE HOT   ***
+grid scores:
+  mean: 808785.95756, std: 3732.33890, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.7, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812217.95285, std: 2332.88180, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 807606.64678, std: 6685.61758, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.9, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 798856.94075, std: 8380.25083, params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 1.0, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 812217.95285
+best params: {'colsample_bytree': 0.67, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> 'subsample': 0.8
+
+grid scores:
+  mean: 807015.44496, std: 1745.61053, params: {'colsample_bytree': 0.6, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.7, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 811229.10339, std: 2626.00511, params: {'colsample_bytree': 0.6, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 809107.13182, std: 3766.10287, params: {'colsample_bytree': 0.6, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.9, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 806700.86249, std: 1673.53048, params: {'colsample_bytree': 0.7, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.7, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 808803.17397, std: 2141.65596, params: {'colsample_bytree': 0.7, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 810538.01687, std: 4532.84397, params: {'colsample_bytree': 0.7, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.9, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 808655.96400, std: 2917.13000, params: {'colsample_bytree': 0.8, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.7, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 809115.42707, std: 2625.94051, params: {'colsample_bytree': 0.8, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 809472.09619, std: 3144.06367, params: {'colsample_bytree': 0.8, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.9, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 811229.10339
+best params: {'colsample_bytree': 0.6, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> 'colsample_bytree': 0.6, 'subsample': 0.8
+
+grid scores:
+  mean: 804112.81441, std: 8632.61400, params: {'colsample_bytree': 0.67, 'learning_rate': 0.03, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812217.95285, std: 2332.88180, params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 807667.00596, std: 2109.00871, params: {'colsample_bytree': 0.67, 'learning_rate': 0.06, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 812217.95285
+best params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> 'learning_rate': 0.045
+
+grid scores:
+  mean: 810936.40241, std: 2661.32895, params: {'colsample_bytree': 0.67, 'learning_rate': 0.04, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812217.95285, std: 2332.88180, params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 811906.13100, std: 3339.45916, params: {'colsample_bytree': 0.67, 'learning_rate': 0.05, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 812217.95285
+best params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> 'learning_rate': 0.045
+
+grid scores:
+  mean: 811208.11854, std: 3435.62254, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.75, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 809690.89826, std: 2189.70344, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812432.77112, std: 4630.29708, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 808096.24696, std: 3457.47957, params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.75, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812217.95285, std: 2332.88180, params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 811478.50583, std: 2864.64292, params: {'colsample_bytree': 0.67, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 812432.77112
+best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> 'learning_rate': 0.045, 'colsample_bytree': 0.65, 'subsample': 0.85
+
+grid scores:
+  mean: 810759.12376, std: 1528.10128, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 50, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 812432.77112, std: 4630.29708, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+  mean: 811977.26246, std: 4991.06664, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 80, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+best score: 812432.77112
+best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7}
+>>> no change
+
+grid scores:
+  mean: 812432.77112, std: 4630.29708, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 810059.35718, std: 1824.61383, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 1.0}
+  mean: 810675.99076, std: 3153.29552, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 2.0}
+  mean: 809731.68599, std: 4091.21405, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 4}
+  mean: 751547.94084, std: 10351.41628, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 10}
+best score: 812432.77112
+best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+>>> 'gamma': 0
+
+grid scores:
+  mean: 786632.68012, std: 7192.58756, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.4, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 746308.67706, std: 11236.07404, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.3, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 695506.87990, std: 7719.89820, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.2, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 812432.77112, std: 4630.29708, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.5, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 802604.50597, std: 2869.94386, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.7, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+  mean: 798443.86047, std: 1863.64175, params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.8, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+best score: 812432.77112
+best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weight': 65, 'n_estimators': 500, 'subsample': 0.85, 'base_score': 0.5, 'objective': 'rank:pairwise', 'max_depth': 7, 'gamma': 0.0}
+>>> 'base_score': 0.5
+
+    """
+
     param_grid = {
+                #'objective': ['binary:logistic'],
+                'objective': ['rank:pairwise'],
+                #'booster': ['gblinear'],
                 'n_estimators': [500],
                 'max_depth': [7],
                 #'max_depth': [7],
-                'colsample_bytree': [0.67],
-                'subsample': [0.9],
+                'colsample_bytree': [0.65],
+                'subsample': [0.85],
                 'min_child_weight': [65],
+                'learning_rate': [0.045],
+                'gamma': [0.],
+                'base_score': [0.4, 0.3, 0.2]
                 }
     for k, v in cv_grid.items():
         param_grid[k] = v
