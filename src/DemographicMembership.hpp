@@ -217,6 +217,7 @@ fit(const num::array2d<real_type> & train_data,
     return booster;
 }
 
+
 std::vector<float>
 predict(
     BoosterHandle booster,
@@ -244,14 +245,69 @@ predict(
 
 }
 
+
+num::array2d<real_type>
+get_dummies(std::valarray<real_type> && what)
+{
+    auto unique = std::unordered_set<real_type>();
+
+    std::copy_if(std::begin(what), std::end(what), std::inserter(unique, unique.end()),
+        [](real_type v)
+        {
+            return !std::isnan(v);
+        }
+    );
+
+//    std::cout << what.size() << " " << unique.size() << std::endl;
+
+    num::array2d<real_type> newmat({what.size(), unique.size()}, 0.0);
+
+    int index{0};
+
+    for (const auto v : unique)
+    {
+        const std::valarray<bool> bool_mask = (what == v);
+        std::valarray<real_type> mask(bool_mask.size());
+
+        std::copy(std::begin(bool_mask), std::end(bool_mask), std::begin(mask));
+
+        newmat[newmat.column(index)] = mask;
+
+        ++index;
+    }
+
+    return newmat;
+}
+
+num::array2d<real_type>
+one_hot(const num::array2d<real_type> & what, std::vector<std::size_t> && columns)
+{
+    num::array2d<real_type> newmat(what);
+
+    for (auto col : columns)
+    {
+        const auto dummies = get_dummies(what[what.column(col)]);
+        newmat = num::add_columns<real_type>(newmat, dummies);
+    }
+
+    // we will only delete columns right-to-left
+    std::sort(columns.begin(), columns.end(), std::greater<std::size_t>());
+    for (auto col : columns)
+    {
+        newmat = num::del_column<real_type>(newmat, col);
+    }
+
+    return newmat;
+}
+
+
+
 std::vector<int>
 DemographicMembership::predict(const int test_type,
     std::vector<std::string> & i_training,
     std::vector<std::string> & i_testing) const
 {
     typedef num::array2d<real_type> array_type;
-
-    const std::string cs_feature_names = "CONSUMER_ID,AGE,GENDER,REGISTRATION_ROUTE,REGISTRATION_CONTEXT,REGISTRATION_DAYS,OPTIN,IS_DELETED,MIGRATED_USER_TYPE,SOCIAL_AUTH_FACEBOOK,SOCIAL_AUTH_TWITTER,SOCIAL_AUTH_GOOGLE,PAGE_IMPRESSIONS,SEARCH_EVENTS,VISITS,VOD_VIEW_VISITS,PAGE_IMPRESSION_VISITS,SEARCH_EVENT_VISITS,TOTAL_DWELL,VOD_VIEWS_DWELL,PAGE_IMPRESSIONS_DWELL,VIDEO_STOPS,VIDEO_COMPLETIONS,MILESTONES_25,MILESTONES_50,MILESTONES_75,VIDEO_CRITICAL_ERRORS,RESUME_NEWS,RESUME_PREVIOUS,BREAKFAST_PAGE_VIEWS,MORNING_PAGE_VIEWS,LUNCHTIME_PAGE_VIEWS,AFTERNOON_PAGE_VIEWS,EARLY_PAGE_VIEWS,LATE_PAGE_VIEWS,POST_PAGE_VIEWS,NIGHT_TIME_PAGE_VIEWS,BREAKFAST_VISITS,MORNING_VISITS,LUNCHTIME_VISITS,AFTERNOON_VISITS,EARLY_PEAK_VISITS,LATE_PEAK_VISITS,POST_PEAK_VISITS,NIGHTTIME_VISITS,TOTAL_VIEWS,WARD_WKDAY_1_2,WARD_WKDAY_3_9,WARD_WKDAY_10_16,WARD_WKDAY_17_19,WARD_WKDAY_20_24,WARD_WKEND_1_2,WARD_WKEND_3_9,WARD_WKEND_10_13,WARD_WKEND_14_20,WARD_WKEND_21_24,UNI_CLUSTER_1,UNI_CLUSTER_2,UNI_CLUSTER_3,UNI_CLUSTER_4,UNI_CLUSTER_5,UNI_CLUSTER_6,UNI_CLUSTER_7,UNI_CLUSTER_8,UNI_CLUSTER_9,UNI_CLUSTER_10,UNI_CLUSTER_11,UNI_CLUSTER_12,UNI_CLUSTER_13,UNI_CLUSTER_14,UNI_CLUSTER_15,UNI_CLUSTER_16,UNI_CLUSTER_17,UNI_CLUSTER_18,UNI_CLUSTER_19,UNI_CLUSTER_20,UNI_CLUSTER_21,UNI_CLUSTER_22,UNI_CLUSTER_23,UNI_CLUSTER_24,UNI_CLUSTER_25,UNI_CLUSTER_26,UNI_CLUSTER_27,UNI_CLUSTER_28,UNI_CLUSTER_29,UNI_CLUSTER_30,UNI_CLUSTER_31,UNI_CLUSTER_32,UNI_CLUSTER_33,VIEWS_ON_WEBSITE,VIEWS_ON_IOS,VIEWS_ON_ANDROID,BREAKFAST_VIEWS,MORNING_VIEWS,LUNCHTIME_VIEWS,AFTERNOON_VIEWS,EARLY_PEAK_VIEWS,LATE_PEAK_VIEWS,POST_PEAK_VIEWS,NIGHT_TIME_VIEWS,CATCHUP_VIEWS,ARCHIVE_VIEWS,VIEWS_MAIN,VIEWS_AFF1,VIEWS_AFF2,VIEWS_AFF3,VIEWS_AFF4,OTHER_VIEWS,FLAG_WARD_WKDAY_1_2,FLAG_WARD_WKDAY_3_9,FLAG_WARD_WKDAY_10_16,FLAG_WARD_WKDAY_17_19,FLAG_WARD_WKDAY_20_24,FLAG_WARD_WKEND_1_2,FLAG_WARD_WKEND_3_9,FLAG_WARD_WKEND_10_13,FLAG_WARD_WKEND_14_20,FLAG_WARD_WKEND_21_24,FLAG_UNI_CLUSTER_1,FLAG_UNI_CLUSTER_2,FLAG_UNI_CLUSTER_3,FLAG_UNI_CLUSTER_4,FLAG_UNI_CLUSTER_5,FLAG_UNI_CLUSTER_6,FLAG_UNI_CLUSTER_7,FLAG_UNI_CLUSTER_8,FLAG_UNI_CLUSTER_9,FLAG_UNI_CLUSTER_10,FLAG_UNI_CLUSTER_11,FLAG_UNI_CLUSTER_12,FLAG_UNI_CLUSTER_13,FLAG_UNI_CLUSTER_14,FLAG_UNI_CLUSTER_15,FLAG_UNI_CLUSTER_16,FLAG_UNI_CLUSTER_17,FLAG_UNI_CLUSTER_18,FLAG_UNI_CLUSTER_19,FLAG_UNI_CLUSTER_20,FLAG_UNI_CLUSTER_21,FLAG_UNI_CLUSTER_22,FLAG_UNI_CLUSTER_23,FLAG_UNI_CLUSTER_24,FLAG_UNI_CLUSTER_25,FLAG_UNI_CLUSTER_26,FLAG_UNI_CLUSTER_27,FLAG_UNI_CLUSTER_28,FLAG_UNI_CLUSTER_29,FLAG_UNI_CLUSTER_30,FLAG_UNI_CLUSTER_31,FLAG_UNI_CLUSTER_32,FLAG_UNI_CLUSTER_33,FLAG_WEBSITE,FLAG_IOS,FLAG_ANDROID,FLAG_BREAKFAST_VIEWS,FLAG_MORNING_VIEWS,FLAG_LUNCHTIME_VIEWS,FLAG_AFTERNOON_VIEWS,FLAG_EARLY_PEAK_VIEWS,FLAG_LATE_PEAK_VIEWS,FLAG_POST_PEAK_VIEWS,FLAG_NIGHT_TIME_VIEWS,FLAG_CATCHUP_VIEWS,FLAG_ARCHIVE_VIEWS,FLAG_MAIN,FLAG_AFF1,FLAG_AFF2,FLAG_AFF3,FLAG_AFF4,FLAG_OTHER_VIEWS,PROP_WARD_WKDAY_1_2,PROP_WARD_WKDAY_3_9,PROP_WARD_WKDAY_10_16,PROP_WARD_WKDAY_17_19,PROP_WARD_WKDAY_20_24,PROP_WARD_WKEND_1_2,PROP_WARD_WKEND_3_9,PROP_WARD_WKEND_10_13,PROP_WARD_WKEND_14_20,PROP_WARD_WKEND_21_24,PROP_UNI_CLUSTER_1,PROP_UNI_CLUSTER_2,PROP_UNI_CLUSTER_3,PROP_UNI_CLUSTER_4,PROP_UNI_CLUSTER_5,PROP_UNI_CLUSTER_6,PROP_UNI_CLUSTER_7,PROP_UNI_CLUSTER_8,PROP_UNI_CLUSTER_9,PROP_UNI_CLUSTER_10,PROP_UNI_CLUSTER_11,PROP_UNI_CLUSTER_12,PROP_UNI_CLUSTER_13,PROP_UNI_CLUSTER_14,PROP_UNI_CLUSTER_15,PROP_UNI_CLUSTER_16,PROP_UNI_CLUSTER_17,PROP_UNI_CLUSTER_18,PROP_UNI_CLUSTER_19,PROP_UNI_CLUSTER_20,PROP_UNI_CLUSTER_21,PROP_UNI_CLUSTER_22,PROP_UNI_CLUSTER_23,PROP_UNI_CLUSTER_24,PROP_UNI_CLUSTER_25,PROP_UNI_CLUSTER_26,PROP_UNI_CLUSTER_27,PROP_UNI_CLUSTER_28,PROP_UNI_CLUSTER_29,PROP_UNI_CLUSTER_30,PROP_UNI_CLUSTER_31,PROP_UNI_CLUSTER_32,PROP_UNI_CLUSTER_33,PROP_WEBSITE,PROP_IOS,PROP_ANDROID,PROP_BREAKFAST_VIEWS,PROP_MORNING_VIEWS,PROP_LUNCHTIME_VIEWS,PROP_AFTERNOON_VIEWS,PROP_EARLY_PEAK_VIEWS,PROP_LATE_PEAK_VIEWS,PROP_POST_PEAK_VIEWS,PROP_NIGHT_TIME_VIEWS,PROP_CATCHUP_VIEWS,PROP_ARCHIVE_VIEWS,PROP_MAIN,PROP_AFF1,PROP_AFF2,PROP_AFF3,PROP_AFF4,PROP_OTHER_VIEWS,PLATFORM_CENTRE,TOD_CENTRE,CONTENT_CENTRE,INTEREST_BEAUTY,INTEREST_TECHNOLOGY,INTEREST_FASHION,INTEREST_COOKING,INTEREST_HOME,INTEREST_QUALITY,INTEREST_DEALS,INTEREST_GREEN,DEMO_X";
 
 
     std::cerr << "predict(): test_type: " << test_type << std::endl;
@@ -323,20 +379,39 @@ DemographicMembership::predict(const int test_type,
 //    std::cerr << std::endl;
 
     // drop the CONSUMER_ID column
-    const array_type test_data({i_test_data.shape().first, i_test_data.shape().second - 1}, i_test_data[i_test_data.columns(1, -1)]);
+    array_type test_data({i_test_data.shape().first, i_test_data.shape().second - 1}, i_test_data[i_test_data.columns(1, -1)]);
     // drop the CONSUMER_ID and DEMO_X columns
-    const array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 2}, i_train_data[i_train_data.columns(1, -2)]);
+    array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 2}, i_train_data[i_train_data.columns(1, -2)]);
 
     std::cerr << "train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "test_data shape: " << test_data.shape() << std::endl;
 
+    { // one hot
+        array_type full_data({train_data.shape().first + test_data.shape().first, train_data.shape().second}, 0);
+        full_data[full_data.rows(0, train_data.shape().first - 1)] = train_data[train_data.rows(0, -1)];
+        full_data[full_data.rows(train_data.shape().first, -1)] = test_data[test_data.rows(0, -1)];
+
+        full_data = one_hot(full_data, {1, 2, 3, 7, 231, 232, 233});
+
+        const auto & c_full_data(full_data);
+
+        train_data = array_type(
+            {train_data.shape().first, full_data.shape().second},
+            c_full_data[full_data.rows(0, train_data.shape().first - 1)]);
+        test_data = array_type(
+            {test_data.shape().first, full_data.shape().second},
+            c_full_data[full_data.rows(train_data.shape().first, -1)]);
+    }
+
+    std::cerr << "OneHot train_data shape: " << train_data.shape() << std::endl;
+    std::cerr << "OneHot test_data shape: " << test_data.shape() << std::endl;
 
     // booster parameters
     const std::map<const std::string, const std::string> params
     {
         {"reg_alpha", "0"},
-        {"colsample_bytree", "0.67"},
-        {"silent", "0"},
+        {"colsample_bytree", "0.65"},
+        {"silent", "1"},
         {"colsample_bylevel", "1"},
         {"scale_pos_weight", "1"},
         {"learning_rate", "0.045"},
@@ -344,7 +419,7 @@ DemographicMembership::predict(const int test_type,
         {"max_delta_step", "0"},
         {"base_score", "0.5"},
         {"n_estimators", "500"},
-        {"subsample", "0.9"},
+        {"subsample", "0.85"},
         {"reg_lambda", "1"},
         {"seed", "0"},
         {"min_child_weight", "65"},
