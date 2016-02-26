@@ -60,13 +60,15 @@ public:
 
     array2d(shape_type shape, value_type initializer);
     array2d(shape_type shape, varray_type && varray);
+    array2d(const array2d & other);
 
     shape_type shape(void) const;
 
-    std::slice row(size_type n) const;
+    std::slice row(int n) const;
     std::slice column(int n) const;
     std::slice stripe(size_type n, enum Axis axis) const;
 
+    std::gslice rows(int p, int q) const;
     std::gslice columns(int p, int q) const;
 
     std::valarray<value_type> operator[](std::slice slicearr) const;
@@ -103,6 +105,18 @@ array2d<_Type>::array2d(shape_type shape, varray_type && varray)
 
 template<typename _Type>
 inline
+array2d<_Type>::array2d(const array2d<_Type> & other)
+:
+    m_shape(other.m_shape),
+    m_varray(other.m_varray)
+{
+
+}
+
+
+
+template<typename _Type>
+inline
 shape_type
 array2d<_Type>::shape(void) const
 {
@@ -112,8 +126,15 @@ array2d<_Type>::shape(void) const
 template<typename _Type>
 inline
 std::slice
-array2d<_Type>::row(size_type n) const
+array2d<_Type>::row(int n) const
 {
+    if (n < 0)
+    {
+        n += m_shape.first;
+    }
+
+    assert(n >= 0 && n < (int)m_shape.first);
+
     return std::slice(n * m_shape.second, m_shape.second, 1);
 }
 
@@ -124,34 +145,65 @@ array2d<_Type>::column(int n) const
 {
     if (n < 0)
     {
-        return std::slice(m_shape.second + n, m_shape.first, m_shape.second);
+        n += m_shape.second;
     }
-    else
-    {
-        return std::slice(n, m_shape.first, m_shape.second);
-    }
+
+    assert(n >= 0 && n < (int)m_shape.second);
+
+    return std::slice(n, m_shape.first, m_shape.second);
 }
+
+
+template<typename _Type>
+inline
+std::gslice
+array2d<_Type>::rows(int p, int q) const
+{
+    // ATTENTION: range is closed on both sides, hence (q - p + 1)
+
+    if (p < 0)
+    {
+        p += m_shape.first;
+    }
+    if (q < 0)
+    {
+        q += m_shape.first;
+    }
+
+    assert(p >= 0 && p < (int)m_shape.first);
+    assert(q >= 0 && q < (int)m_shape.first);
+
+    return std::gslice(
+        p * m_shape.second,
+        {(q - p + 1u) * m_shape.second}, // type razy powtarzaj
+        {1u} // z takim krokiem
+    );
+}
+
 
 template<typename _Type>
 inline
 std::gslice
 array2d<_Type>::columns(int p, int q) const
 {
+    // ATTENTION: range is closed on both sides, hence (q - p + 1)
+
     if (p < 0)
     {
-        assert(-p < (int)m_shape.second);
-        p = m_shape.second + p;
+        p += m_shape.second;
     }
     if (q < 0)
     {
-        assert(-q < (int)m_shape.second);
-        q = m_shape.second + q;
+        q += m_shape.second;
     }
+
+    assert(p >= 0 && p < (int)m_shape.second);
+    assert(q >= 0 && q < (int)m_shape.second);
 
     return std::gslice(
         p,
-        {m_shape.first, {q - p + 1u}},
-        {m_shape.second, 1u}
+        {m_shape.first, {q - p + 1u}}, // type razy powtarzaj
+        {m_shape.second, 1u} // z takim krokiem
     );
 }
 
@@ -358,6 +410,65 @@ loadtxt(
 
     return result;
 }
+
+
+template<typename _Type>
+array2d<_Type>
+add_column(const array2d<_Type> & left, const std::vector<_Type> & col)
+{
+    assert(false);
+    // NOT IMPLEMENTED
+    assert(left.shape().first == col.size());
+
+    array2d<_Type> newmat = zeros<_Type>({left.shape().first, left.shape().second + 1});
+
+    newmat[newmat.columns(0, -2)] = left[left.columns(0, -1)];
+    newmat[newmat.columns(-2, -1)] = col; // TODO ???
+
+    return newmat;
+}
+
+
+template<typename _Type>
+array2d<_Type>
+add_columns(const array2d<_Type> & left, const array2d<_Type> & right)
+{
+    assert(left.shape().first == right.shape().first);
+
+    array2d<_Type> newmat({left.shape().first, left.shape().second + right.shape().second}, 0.0);
+
+    newmat[newmat.columns(0, left.shape().second - 1)] = left[left.columns(0, -1)];
+    newmat[newmat.columns(left.shape().second, -1)] = right[right.columns(0, -1)];
+
+    return newmat;
+}
+
+
+template<typename _Type>
+array2d<_Type>
+del_column(const array2d<_Type> & left, const int p)
+{
+    const auto index = p > 0 ? p : left.shape().second + p;
+
+    array2d<_Type> newmat({left.shape().first, left.shape().second - 1}, 0.0);
+
+    if (index == 0)
+    {
+        newmat[newmat.columns(0, -1)] = left[left.columns(1, -1)];
+    }
+    else if (index == left.shape().second - 1)
+    {
+        newmat[newmat.columns(0, -1)] = left[left.columns(0, -2)];
+    }
+    else
+    {
+        newmat[newmat.columns(0, index - 1)] = left[left.columns(0, index - 1)];
+        newmat[newmat.columns(index, -1)] = left[left.columns(index + 1, -1)];
+    }
+
+    return newmat;
+}
+
 
 template<typename _Type>
 inline
