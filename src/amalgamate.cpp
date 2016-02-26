@@ -1,5 +1,7 @@
 #define DMLC_ENABLE_STD_THREAD 0
 
+#pragma GCC optimize ( "-Os" )
+
 #include "src/c_api/c_api.cc"
 #include "src/data/simple_csr_source.cc"
 #include "dmlc-core/src/data.cc"
