@@ -268,6 +268,18 @@ def work(out_csv_file,
     from sklearn.cross_validation import StratifiedKFold
     from sklearn.grid_search import GridSearchCV
 
+    if False:
+        skf = StratifiedKFold(train_y, n_folds=nfolds)
+        from numpy import asarray
+        selection = asarray(['-'] * len(train_y))
+        symbol = 0
+        for train_index, test_index in skf:
+            selection[test_index] =chr(symbol + 48)
+            symbol += 1
+            pass
+        print(''.join(selection))
+        return
+
     muse_kwargs = \
     {
         #'objective': 'reg:logistic',
@@ -298,6 +310,7 @@ def work(out_csv_file,
         P = precision_score(y_true, y_pred)
         R = recall_score(y_true, y_pred)
         score = 1000000 * min(P, R)
+
         return score
     tco_scorer = make_scorer(TcoScorer)
 
