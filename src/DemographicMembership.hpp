@@ -391,9 +391,16 @@ DemographicMembership::predict(const int test_type,
         full_data[full_data.rows(0, train_data.shape().first - 1)] = train_data[train_data.rows(0, -1)];
         full_data[full_data.rows(train_data.shape().first, -1)] = test_data[test_data.rows(0, -1)];
 
-        full_data = one_hot(full_data, {1, 2, 3, 7, 231, 232, 233});
-
         const auto & c_full_data(full_data);
+
+        // <<< feature engineering with ZERO balance
+
+        full_data[full_data.column(18)] = c_full_data[full_data.column(18)] / c_full_data[full_data.column(17)];
+        full_data[full_data.column(19)] = c_full_data[full_data.column(19)] / c_full_data[full_data.column(17)];
+
+        // >>> feature engineering
+
+        full_data = one_hot(full_data, {1, 2, 3, 7, 231, 232, 233});
 
         train_data = array_type(
             {train_data.shape().first, full_data.shape().second},
@@ -427,10 +434,6 @@ DemographicMembership::predict(const int test_type,
         {"min_child_weight", "65"},
 
         {"objective", "rank:pairwise"},
-//        {"objective", "multi:softmax"},
-//        {"objective", "reg:linear"},
-
-//        {"num_class", "2"},
         {"max_depth", "7"},
         {"gamma", "0"}
     };
