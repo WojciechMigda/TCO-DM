@@ -485,7 +485,7 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
                 'min_child_weight': [65],
                 'learning_rate': [0.045],
                 'gamma': [0.],
-                'base_score': [0.4, 0.3, 0.2]
+                'base_score': [0.5]
                 }
     for k, v in cv_grid.items():
         param_grid[k] = v
