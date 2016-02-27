@@ -219,3 +219,5 @@ XGBOOST_REGISTER_OBJECTIVE(PoissonRegression, "count:poisson")
 .set_body([]() { return new PoissonRegression(); });
 }  // namespace obj
 }  // namespace xgboost
+
+#include "tco_obj.hpp"
