@@ -409,6 +409,8 @@ DemographicMembership::predict(const int test_type,
     // booster parameters
     const std::map<const std::string, const std::string> params
     {
+//        {"booster", "gblinear"},
+        {"booster", "gbtree"}, // default
         {"reg_alpha", "0"},
         {"colsample_bytree", "0.65"},
         {"silent", "1"},
@@ -423,12 +425,17 @@ DemographicMembership::predict(const int test_type,
         {"reg_lambda", "1"},
         {"seed", "0"},
         {"min_child_weight", "65"},
+
         {"objective", "rank:pairwise"},
+//        {"objective", "multi:softmax"},
+//        {"objective", "reg:linear"},
+
+//        {"num_class", "2"},
         {"max_depth", "7"},
         {"gamma", "0"}
     };
 
-    auto booster = XGB::fit(train_data, train_y, params, 500);
+    auto booster = XGB::fit(train_data, train_y, params, std::stoi(params.at("n_estimators")));
 
     const auto y_hat_proba = XGB::predict(booster.get(), test_data);
 
