@@ -90,12 +90,28 @@ struct DemographicMembership
         std::vector<std::string> & i_testing) const;
 };
 
+
+constexpr float MISSING{NAN};
+constexpr float XGB_MISSING{NAN};
+
+bool is_missing(float v)
+{
+    if (std::isnan(MISSING))
+    {
+        return std::isnan(v);
+    }
+    else
+    {
+        return v == MISSING;
+    }
+}
+
 /*
  * NA/numeric converter for loadtxt
  */
 auto na_xlt = [](const char * str) -> real_type
 {
-    return (std::strcmp(str, "NA") == 0) ? NAN : std::strtod(str, nullptr);
+    return (std::strcmp(str, "NA") == 0) ? MISSING : std::strtod(str, nullptr);
 };
 
 /*
@@ -105,7 +121,7 @@ auto gender_xlt = [](const char * str) -> real_type
 {
     if (strcmp(str, "U") == 0)
     {
-        return NAN;
+        return MISSING;
     }
     else if (strcmp(str, "M") == 0)
     {
@@ -129,7 +145,7 @@ auto yes_no_xlt = [](const char * str) -> real_type
 {
     if (strcmp(str, "NA") == 0)
     {
-        return NAN;
+        return MISSING;
     }
     else if (strcmp(str, "Y") == 0)
     {
@@ -164,7 +180,7 @@ auto from_list_xlt = [](const std::vector<std::string> & patterns, const char * 
     }
     else if (strcmp(str, "NA") == 0)
     {
-        return NAN;
+        return MISSING;
     }
     else
     {
@@ -185,12 +201,13 @@ fit(const num::array2d<real_type> & train_data,
     // prepare placeholder for raw matrix later used by xgboost
     std::vector<float> train_vec = train_data.tovector();
     std::cerr << "train_vec size: " << train_vec.size() << std::endl;
+//    assert(std::none_of(train_vec.cbegin(), train_vec.cend(), [](float x){return std::isnan(x);}));
 
     std::unique_ptr<void, int (*)(DMatrixHandle)> tr_dmat(
         XGDMatrixCreateFromMat(
             train_vec.data(),
             train_data.shape().first,
-            train_data.shape().second, NAN),
+            train_data.shape().second, XGB_MISSING),
         XGDMatrixFree);
 
     // attach response vector to tr_dmat
@@ -230,7 +247,7 @@ predict(
         XGDMatrixCreateFromMat(
             test_vec.data(),
             test_data.shape().first,
-            test_data.shape().second, NAN),
+            test_data.shape().second, XGB_MISSING),
         XGDMatrixFree);
 
     bst_ulong y_hat_len{0};
@@ -254,7 +271,7 @@ get_dummies(std::valarray<real_type> && what)
     std::copy_if(std::begin(what), std::end(what), std::inserter(unique, unique.end()),
         [](real_type v)
         {
-            return !std::isnan(v);
+            return !is_missing(v);
         }
     );
 
@@ -395,8 +412,8 @@ DemographicMembership::predict(const int test_type,
 
         // <<< feature engineering with ZERO balance
 
-        full_data[full_data.column(18)] = c_full_data[full_data.column(18)] / c_full_data[full_data.column(17)];
-        full_data[full_data.column(19)] = c_full_data[full_data.column(19)] / c_full_data[full_data.column(17)];
+//        full_data[full_data.column(18)] = c_full_data[full_data.column(18)] / c_full_data[full_data.column(17)];
+//        full_data[full_data.column(19)] = c_full_data[full_data.column(19)] / c_full_data[full_data.column(17)];
 
         // >>> feature engineering
 
@@ -427,7 +444,7 @@ DemographicMembership::predict(const int test_type,
         {"missing", "nan"},
         {"max_delta_step", "0"},
         {"base_score", "0.5"},
-        {"n_estimators", "500"},
+        {"n_estimators", "600"},
         {"subsample", "0.85"},
         {"reg_lambda", "1"},
         {"seed", "0"},
