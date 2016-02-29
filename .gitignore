@@ -11,3 +11,4 @@ install_manifest.txt
 main
 src/submission.cpp
 src/submission.o
+*.pyc
