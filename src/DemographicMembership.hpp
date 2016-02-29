@@ -297,26 +297,70 @@ get_dummies(std::valarray<real_type> && what)
 }
 
 num::array2d<real_type>
-one_hot(const num::array2d<real_type> & what, std::vector<std::size_t> && columns)
+one_hot(const num::array2d<real_type> & what, std::vector<std::string> & colnames, std::vector<std::size_t> && columns)
 {
     num::array2d<real_type> newmat(what);
 
-    for (auto col : columns)
+    for (const auto col : columns)
     {
         const auto dummies = get_dummies(what[what.column(col)]);
+
         newmat = num::add_columns<real_type>(newmat, dummies);
+
+        const std::string colname = colnames[col];
+        for (std::size_t dummy{0}; dummy < dummies.shape().second; ++dummy)
+        {
+            colnames.emplace_back(colname + "_" + std::to_string(dummy + 1));
+        }
     }
 
     // we will only delete columns right-to-left
     std::sort(columns.begin(), columns.end(), std::greater<std::size_t>());
-    for (auto col : columns)
+    for (const auto col : columns)
     {
         newmat = num::del_column<real_type>(newmat, col);
+
+        colnames.erase(colnames.begin() + col);
     }
 
     return newmat;
 }
 
+
+std::size_t
+colidx(const std::vector<std::string> & colnames, const std::string & name)
+{
+    std::vector<std::string>::const_iterator found = std::find(colnames.cbegin(), colnames.cend(), name);
+    if (found == colnames.cend())
+    {
+        std::cerr << "Bad column name: " << name << std::endl;
+    }
+    assert(found != colnames.cend());
+    return found - colnames.cbegin();
+}
+
+
+num::array2d<real_type>
+binary_prop(
+    const num::array2d<real_type> & what,
+    std::vector<std::string> & colnames,
+    std::string && newcol,
+    std::string && lhs,
+    std::string && rhs)
+{
+    num::array2d<real_type> newmat(what);
+
+    colnames.push_back(newcol);
+
+    const std::size_t left = colidx(colnames, lhs);
+    const std::size_t right = colidx(colnames, rhs);
+
+    const std::valarray<real_type> result = what[what.column(left)] / what[what.column(right)];
+
+    newmat = num::add_column(newmat, result);
+
+    return newmat;
+}
 
 
 std::vector<int>
@@ -326,6 +370,7 @@ DemographicMembership::predict(const int test_type,
 {
     typedef num::array2d<real_type> array_type;
 
+    std::vector<std::string> colnames{"CONSUMER_ID", "AGE", "GENDER", "REGISTRATION_ROUTE", "REGISTRATION_CONTEXT", "REGISTRATION_DAYS", "OPTIN", "IS_DELETED", "MIGRATED_USER_TYPE", "SOCIAL_AUTH_FACEBOOK", "SOCIAL_AUTH_TWITTER", "SOCIAL_AUTH_GOOGLE", "PAGE_IMPRESSIONS", "SEARCH_EVENTS", "VISITS", "VOD_VIEW_VISITS", "PAGE_IMPRESSION_VISITS", "SEARCH_EVENT_VISITS", "TOTAL_DWELL", "VOD_VIEWS_DWELL", "PAGE_IMPRESSIONS_DWELL", "VIDEO_STOPS", "VIDEO_COMPLETIONS", "MILESTONES_25", "MILESTONES_50", "MILESTONES_75", "VIDEO_CRITICAL_ERRORS", "RESUME_NEWS", "RESUME_PREVIOUS", "BREAKFAST_PAGE_VIEWS", "MORNING_PAGE_VIEWS", "LUNCHTIME_PAGE_VIEWS", "AFTERNOON_PAGE_VIEWS", "EARLY_PAGE_VIEWS", "LATE_PAGE_VIEWS", "POST_PAGE_VIEWS", "NIGHT_TIME_PAGE_VIEWS", "BREAKFAST_VISITS", "MORNING_VISITS", "LUNCHTIME_VISITS", "AFTERNOON_VISITS", "EARLY_PEAK_VISITS", "LATE_PEAK_VISITS", "POST_PEAK_VISITS", "NIGHTTIME_VISITS", "TOTAL_VIEWS", "WARD_WKDAY_1_2", "WARD_WKDAY_3_9", "WARD_WKDAY_10_16", "WARD_WKDAY_17_19", "WARD_WKDAY_20_24", "WARD_WKEND_1_2", "WARD_WKEND_3_9", "WARD_WKEND_10_13", "WARD_WKEND_14_20", "WARD_WKEND_21_24", "UNI_CLUSTER_1", "UNI_CLUSTER_2", "UNI_CLUSTER_3", "UNI_CLUSTER_4", "UNI_CLUSTER_5", "UNI_CLUSTER_6", "UNI_CLUSTER_7", "UNI_CLUSTER_8", "UNI_CLUSTER_9", "UNI_CLUSTER_10", "UNI_CLUSTER_11", "UNI_CLUSTER_12", "UNI_CLUSTER_13", "UNI_CLUSTER_14", "UNI_CLUSTER_15", "UNI_CLUSTER_16", "UNI_CLUSTER_17", "UNI_CLUSTER_18", "UNI_CLUSTER_19", "UNI_CLUSTER_20", "UNI_CLUSTER_21", "UNI_CLUSTER_22", "UNI_CLUSTER_23", "UNI_CLUSTER_24", "UNI_CLUSTER_25", "UNI_CLUSTER_26", "UNI_CLUSTER_27", "UNI_CLUSTER_28", "UNI_CLUSTER_29", "UNI_CLUSTER_30", "UNI_CLUSTER_31", "UNI_CLUSTER_32", "UNI_CLUSTER_33", "VIEWS_ON_WEBSITE", "VIEWS_ON_IOS", "VIEWS_ON_ANDROID", "BREAKFAST_VIEWS", "MORNING_VIEWS", "LUNCHTIME_VIEWS", "AFTERNOON_VIEWS", "EARLY_PEAK_VIEWS", "LATE_PEAK_VIEWS", "POST_PEAK_VIEWS", "NIGHT_TIME_VIEWS", "CATCHUP_VIEWS", "ARCHIVE_VIEWS", "VIEWS_MAIN", "VIEWS_AFF1", "VIEWS_AFF2", "VIEWS_AFF3", "VIEWS_AFF4", "OTHER_VIEWS", "FLAG_WARD_WKDAY_1_2", "FLAG_WARD_WKDAY_3_9", "FLAG_WARD_WKDAY_10_16", "FLAG_WARD_WKDAY_17_19", "FLAG_WARD_WKDAY_20_24", "FLAG_WARD_WKEND_1_2", "FLAG_WARD_WKEND_3_9", "FLAG_WARD_WKEND_10_13", "FLAG_WARD_WKEND_14_20", "FLAG_WARD_WKEND_21_24", "FLAG_UNI_CLUSTER_1", "FLAG_UNI_CLUSTER_2", "FLAG_UNI_CLUSTER_3", "FLAG_UNI_CLUSTER_4", "FLAG_UNI_CLUSTER_5", "FLAG_UNI_CLUSTER_6", "FLAG_UNI_CLUSTER_7", "FLAG_UNI_CLUSTER_8", "FLAG_UNI_CLUSTER_9", "FLAG_UNI_CLUSTER_10", "FLAG_UNI_CLUSTER_11", "FLAG_UNI_CLUSTER_12", "FLAG_UNI_CLUSTER_13", "FLAG_UNI_CLUSTER_14", "FLAG_UNI_CLUSTER_15", "FLAG_UNI_CLUSTER_16", "FLAG_UNI_CLUSTER_17", "FLAG_UNI_CLUSTER_18", "FLAG_UNI_CLUSTER_19", "FLAG_UNI_CLUSTER_20", "FLAG_UNI_CLUSTER_21", "FLAG_UNI_CLUSTER_22", "FLAG_UNI_CLUSTER_23", "FLAG_UNI_CLUSTER_24", "FLAG_UNI_CLUSTER_25", "FLAG_UNI_CLUSTER_26", "FLAG_UNI_CLUSTER_27", "FLAG_UNI_CLUSTER_28", "FLAG_UNI_CLUSTER_29", "FLAG_UNI_CLUSTER_30", "FLAG_UNI_CLUSTER_31", "FLAG_UNI_CLUSTER_32", "FLAG_UNI_CLUSTER_33", "FLAG_WEBSITE", "FLAG_IOS", "FLAG_ANDROID", "FLAG_BREAKFAST_VIEWS", "FLAG_MORNING_VIEWS", "FLAG_LUNCHTIME_VIEWS", "FLAG_AFTERNOON_VIEWS", "FLAG_EARLY_PEAK_VIEWS", "FLAG_LATE_PEAK_VIEWS", "FLAG_POST_PEAK_VIEWS", "FLAG_NIGHT_TIME_VIEWS", "FLAG_CATCHUP_VIEWS", "FLAG_ARCHIVE_VIEWS", "FLAG_MAIN", "FLAG_AFF1", "FLAG_AFF2", "FLAG_AFF3", "FLAG_AFF4", "FLAG_OTHER_VIEWS", "PROP_WARD_WKDAY_1_2", "PROP_WARD_WKDAY_3_9", "PROP_WARD_WKDAY_10_16", "PROP_WARD_WKDAY_17_19", "PROP_WARD_WKDAY_20_24", "PROP_WARD_WKEND_1_2", "PROP_WARD_WKEND_3_9", "PROP_WARD_WKEND_10_13", "PROP_WARD_WKEND_14_20", "PROP_WARD_WKEND_21_24", "PROP_UNI_CLUSTER_1", "PROP_UNI_CLUSTER_2", "PROP_UNI_CLUSTER_3", "PROP_UNI_CLUSTER_4", "PROP_UNI_CLUSTER_5", "PROP_UNI_CLUSTER_6", "PROP_UNI_CLUSTER_7", "PROP_UNI_CLUSTER_8", "PROP_UNI_CLUSTER_9", "PROP_UNI_CLUSTER_10", "PROP_UNI_CLUSTER_11", "PROP_UNI_CLUSTER_12", "PROP_UNI_CLUSTER_13", "PROP_UNI_CLUSTER_14", "PROP_UNI_CLUSTER_15", "PROP_UNI_CLUSTER_16", "PROP_UNI_CLUSTER_17", "PROP_UNI_CLUSTER_18", "PROP_UNI_CLUSTER_19", "PROP_UNI_CLUSTER_20", "PROP_UNI_CLUSTER_21", "PROP_UNI_CLUSTER_22", "PROP_UNI_CLUSTER_23", "PROP_UNI_CLUSTER_24", "PROP_UNI_CLUSTER_25", "PROP_UNI_CLUSTER_26", "PROP_UNI_CLUSTER_27", "PROP_UNI_CLUSTER_28", "PROP_UNI_CLUSTER_29", "PROP_UNI_CLUSTER_30", "PROP_UNI_CLUSTER_31", "PROP_UNI_CLUSTER_32", "PROP_UNI_CLUSTER_33", "PROP_WEBSITE", "PROP_IOS", "PROP_ANDROID", "PROP_BREAKFAST_VIEWS", "PROP_MORNING_VIEWS", "PROP_LUNCHTIME_VIEWS", "PROP_AFTERNOON_VIEWS", "PROP_EARLY_PEAK_VIEWS", "PROP_LATE_PEAK_VIEWS", "PROP_POST_PEAK_VIEWS", "PROP_NIGHT_TIME_VIEWS", "PROP_CATCHUP_VIEWS", "PROP_ARCHIVE_VIEWS", "PROP_MAIN", "PROP_AFF1", "PROP_AFF2", "PROP_AFF3", "PROP_AFF4", "PROP_OTHER_VIEWS", "PLATFORM_CENTRE", "TOD_CENTRE", "CONTENT_CENTRE", "INTEREST_BEAUTY", "INTEREST_TECHNOLOGY", "INTEREST_FASHION", "INTEREST_COOKING", "INTEREST_HOME", "INTEREST_QUALITY", "INTEREST_DEALS", "INTEREST_GREEN", "DEMO_X"};
 
     std::cerr << "predict(): test_type: " << test_type << std::endl;
 
@@ -388,36 +433,52 @@ DemographicMembership::predict(const int test_type,
         );
 
     // retrieve response vector
-    const array_type::varray_type train_y_va = i_train_data[i_train_data.column(-1)];
-    const std::vector<float> train_y(std::begin(train_y_va), std::end(train_y_va));
+    const array_type::varray_type train_y_valarr = i_train_data[i_train_data.column(-1)];
+    const std::vector<float> train_y(std::begin(train_y_valarr), std::end(train_y_valarr));
 
     std::cerr << "train_y size: " << train_y.size() << std::endl;
-//    std::copy(train_y.cbegin(), train_y.cbegin() + 10, std::ostream_iterator<real_type>(std::cerr, ", "));
-//    std::cerr << std::endl;
+
 
     // drop the CONSUMER_ID column
     array_type test_data({i_test_data.shape().first, i_test_data.shape().second - 1}, i_test_data[i_test_data.columns(1, -1)]);
     // drop the CONSUMER_ID and DEMO_X columns
     array_type train_data({i_train_data.shape().first, i_train_data.shape().second - 2}, i_train_data[i_train_data.columns(1, -2)]);
 
+    colnames.erase(colnames.end() - 1);
+    colnames.erase(colnames.begin());
+    assert(colnames.size() == train_data.shape().second);
+
     std::cerr << "train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "test_data shape: " << test_data.shape() << std::endl;
 
-    { // one hot
+    {
         array_type full_data({train_data.shape().first + test_data.shape().first, train_data.shape().second}, 0);
         full_data[full_data.rows(0, train_data.shape().first - 1)] = train_data[train_data.rows(0, -1)];
         full_data[full_data.rows(train_data.shape().first, -1)] = test_data[test_data.rows(0, -1)];
 
         const auto & c_full_data(full_data);
 
-        // <<< feature engineering with ZERO balance
+        full_data = one_hot(full_data, colnames, {1, 2, 3, 7, 231, 232, 233});
 
-//        full_data[full_data.column(18)] = c_full_data[full_data.column(18)] / c_full_data[full_data.column(17)];
-//        full_data[full_data.column(19)] = c_full_data[full_data.column(19)] / c_full_data[full_data.column(17)];
+        assert(colnames.size() == full_data.shape().second);
+
+        // <<< feature engineering
+
+        full_data = binary_prop(full_data, colnames, "PROP_PAGE_IMPRESSIONS_DWELL", "PAGE_IMPRESSIONS_DWELL", "TOTAL_DWELL");
+        full_data = binary_prop(full_data, colnames, "PROP_VOD_VIEWS_DWELL", "VOD_VIEWS_DWELL", "TOTAL_DWELL");
+
+//        full_data = binary_prop(full_data, colnames, "LATE_PAGE_VIEWS_PER_DAY", "LATE_PAGE_VIEWS", "REGISTRATION_DAYS");
+//        full_data = binary_prop(full_data, colnames, "AFTERNOON_PAGE_VIEWS_PER_DAY", "AFTERNOON_PAGE_VIEWS", "REGISTRATION_DAYS");
+//        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSIONS_DWELL_PER_DAY", "PAGE_IMPRESSIONS_DWELL", "REGISTRATION_DAYS");
+//        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSION_VISITS_PER_DAY", "PAGE_IMPRESSION_VISITS", "REGISTRATION_DAYS");
+//        full_data = binary_prop(full_data, colnames, "LUNCHTIME_PAGE_VIEWS_PER_DAY", "LUNCHTIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+//
+//        full_data = binary_prop(full_data, colnames, "TOTAL_DWELL_PER_DAY", "TOTAL_DWELL", "REGISTRATION_DAYS");
+//        full_data = binary_prop(full_data, colnames, "NIGHT_TIME_PAGE_VIEWS_DAY", "NIGHT_TIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+
+        assert(colnames.size() == full_data.shape().second);
 
         // >>> feature engineering
-
-        full_data = one_hot(full_data, {1, 2, 3, 7, 231, 232, 233});
 
         train_data = array_type(
             {train_data.shape().first, full_data.shape().second},
@@ -427,8 +488,8 @@ DemographicMembership::predict(const int test_type,
             c_full_data[full_data.rows(train_data.shape().first, -1)]);
     }
 
-    std::cerr << "OneHot train_data shape: " << train_data.shape() << std::endl;
-    std::cerr << "OneHot test_data shape: " << test_data.shape() << std::endl;
+    std::cerr << "OneHot/FE train_data shape: " << train_data.shape() << std::endl;
+    std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
     // booster parameters
     const std::map<const std::string, const std::string> params
@@ -444,7 +505,7 @@ DemographicMembership::predict(const int test_type,
         {"missing", "nan"},
         {"max_delta_step", "0"},
         {"base_score", "0.5"},
-        {"n_estimators", "600"},
+        {"n_estimators", "500"},
         {"subsample", "0.85"},
         {"reg_lambda", "1"},
         {"seed", "0"},
