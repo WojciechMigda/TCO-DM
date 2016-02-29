@@ -65,161 +65,8 @@ def OneHot(df, colnames):
     return df
 
 
-
-
 from sklearn.base import BaseEstimator, RegressorMixin
 
-class PrudentialRegressorCVO2(BaseEstimator, RegressorMixin):
-    def __init__(self,
-                objective='reg:linear',
-                learning_rate=0.045,
-                learning_rates=None,
-                min_child_weight=50,
-                subsample=0.8,
-                colsample_bytree=0.7,
-                max_depth=7,
-                gamma=0.0,
-                n_estimators=700,
-                nthread=-1,
-                seed=0,
-                n_buckets=8,
-                int_fold=6,
-                initial_params=[-1.5, -2.6, -3.6, -1.2, -0.8, 0.04, 0.7, 3.6,
-                                #1., 2., 3., 4., 5., 6., 7.
-                                ],
-                minimizer='BFGS',
-                scoring=None):
-
-        self.objective = objective
-        self.learning_rate = learning_rate
-        self.learning_rates = learning_rates
-        self.min_child_weight = min_child_weight
-        self.subsample = subsample
-        self.colsample_bytree = colsample_bytree
-        self.max_depth = max_depth
-        self.gamma = gamma
-        self.n_estimators = n_estimators
-        self.nthread = nthread
-        self.seed = seed
-        self.n_buckets = n_buckets
-        self.int_fold = int_fold
-        self.initial_params = initial_params
-        self.minimizer = minimizer
-        self.scoring = scoring
-        self.feature_importances_ = None
-
-        return
-
-
-    def _update_feature_iportances(self, feature_names):
-        from numpy import zeros
-        feature_importances = zeros(len(feature_names))
-
-        for xgb in self.xgb:
-            importances = xgb.booster().get_fscore()
-            for i, feat in enumerate(feature_names):
-                if feat in importances:
-                    feature_importances[i] += importances[feat]
-                    pass
-                pass
-            pass
-
-        self.feature_importances_ = feature_importances / sum(feature_importances)
-        return
-
-
-    def fit(self, X, y):
-        from OptimizedOffsetRegressor import DigitizedOptimizedOffsetRegressor
-
-
-        from sklearn.cross_validation import StratifiedKFold
-        kf = StratifiedKFold(y, n_folds=self.int_fold)
-        print(kf)
-        self.xgb = []
-        self.off = []
-        for i, (itrain, itest) in enumerate(kf):
-            ytrain = y[itrain]
-            Xtrain = X.iloc[list(itrain)]
-            ytest = y[itest]
-            Xtest = X.iloc[list(itest)]
-
-            self.xgb += [None]
-
-            from xgb_sklearn import XGBRegressor
-            #from xgboost import XGBRegressor
-            self.xgb[i] = XGBRegressor(
-                           objective=self.objective,
-                           learning_rate=self.learning_rate,
-                           min_child_weight=self.min_child_weight,
-                           subsample=self.subsample,
-                           colsample_bytree=self.colsample_bytree,
-                           max_depth=self.max_depth,
-                           gamma=self.gamma,
-                           n_estimators=self.n_estimators,
-                           nthread=self.nthread,
-                           missing=0.0,
-                           seed=self.seed)
-            self.xgb[i].fit(Xtrain, ytrain,
-                            eval_set=[(Xtest, ytest)],
-                            #eval_metric=self.scoring,
-                            #eval_metric='rmse',
-                            eval_metric=scirpus_error,
-                            #eval_metric=qwkappa_error,
-                            verbose=False,
-                            early_stopping_rounds=30,
-                            learning_rates=self.learning_rates,
-                            obj=scirpus_regobj
-                            #obj=qwkappa_regobj
-                            )
-            print("best iteration:", self.xgb[i].booster().best_iteration)
-            te_y_hat = self.xgb[i].predict(Xtest,
-                                        ntree_limit=self.xgb[i].booster().best_iteration)
-            print('XGB Test score is:', -self.scoring(te_y_hat, ytest))
-
-            self.off += [None]
-            self.off[i] = DigitizedOptimizedOffsetRegressor(n_buckets=self.n_buckets,
-                           initial_params=self.initial_params,
-                           minimizer=self.minimizer,
-                           scoring=self.scoring)
-            self.off[i].fit(te_y_hat, ytest)
-            print("Offsets:", self.off[i].params)
-
-            pass
-
-        self._update_feature_iportances(X.columns.values.tolist())
-
-        return self
-
-
-    def predict(self, X):
-        from numpy import clip, array
-        result = []
-        for xgb, off in zip(self.xgb, self.off):
-            te_y_hat = xgb.predict(X, ntree_limit=xgb.booster().best_iteration)
-            result.append(off.predict(te_y_hat))
-        result = clip(array(result).mean(axis=0), 1, 8)
-        return result
-
-    pass
-
-
-
-def scirpus_regobj(preds, dtrain):
-    labels = dtrain.get_label()
-    x = (preds - labels)
-    from numpy import exp as npexp
-    grad = 2 * x * npexp(-(x ** 2)) * (npexp(x ** 2) + x ** 2 + 1)
-    hess = 2 * npexp(-(x ** 2)) * (npexp(x ** 2) - 2 * (x ** 4) + 5 * (x ** 2) - 1)
-    return grad, hess
-
-
-def scirpus_error(preds, dtrain):
-    labels = dtrain.get_label()
-    x = (labels - preds)
-    from numpy import exp as npexp
-    error = (x ** 2) * (1 - npexp(-(x ** 2)))
-    from numpy import mean
-    return 'error', mean(error)
 
 NOMINALS = ['GENDER', 'REGISTRATION_ROUTE', 'REGISTRATION_CONTEXT',
             'MIGRATED_USER_TYPE', 'PLATFORM_CENTRE', 'TOD_CENTRE',
@@ -264,6 +111,69 @@ def work(out_csv_file,
         pass
 
     train_X = OneHot(train_X, NOMINALS)
+
+#    train_X['**PROP_PAGE_IMPRESSIONS_DWELL'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['TOTAL_DWELL']
+#    train_X['**PROP_VOD_VIEWS_DWELL'] = train_X['VOD_VIEWS_DWELL'] / train_X['TOTAL_DWELL']
+#
+#    train_X['**FLAG_WARD_WKDAY_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKDAY_')]].sum(axis=1)
+#    train_X['**FLAG_WARD_WKEND_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKEND_')]].sum(axis=1)
+#    train_X['**FLAG_UNI_CLUSTER_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_UNI_CLUSTER_')]].sum(axis=1)
+#    train_X['**INTERESTS_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('INTEREST_')]].sum(axis=1)
+#    train_X['**AGE_25'] = train_X['AGE'] < 25
+#    train_X['**AGE_30'] = train_X['AGE'] < 30
+#    train_X['**AGE_35'] = train_X['AGE'] < 35
+#    train_X['**AGE_40'] = train_X['AGE'] < 40
+#    train_X['**AGE_45'] = train_X['AGE'] < 45
+#    train_X['**PAGE_IMP_DWELL_PER_DAY'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['REGISTRATION_DAYS']
+#    train_X['**LATE_PAGE_VIEWS_PER_DAY'] = train_X['LATE_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**TOTAL_DWELL_PER_DAY'] = train_X['TOTAL_DWELL'] / train_X['REGISTRATION_DAYS']
+#    train_X['**AFTERNOON_PAGE_VIEWS_PER_DAY'] = train_X['AFTERNOON_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**PAGE_IMPRESSION_VISITS_PER_DAY'] = train_X['PAGE_IMPRESSION_VISITS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**LUNCHTIME_PAGE_VIEWS_PER_DAY'] = train_X['LUNCHTIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**NIGHT_TIME_PAGE_VIEWS_PER_DAY'] = train_X['NIGHT_TIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**BREAKFAST_PAGE_VIEWS_PER_DAY'] = train_X['BREAKFAST_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+#    train_X['**VIDEO_STOPS_PER_DAY'] = train_X['VIDEO_STOPS'] / train_X['REGISTRATION_DAYS']
+
+#    TO_DROP = [
+#        'VIEWS_AFF4', 'FLAG_WARD_WKDAY_10_16', 'FLAG_WARD_WKDAY_17_19',
+#        'FLAG_WARD_WKDAY_20_24', 'FLAG_WARD_WKEND_10_13', 'FLAG_WARD_WKEND_14_20',
+#        'FLAG_UNI_CLUSTER_15', 'FLAG_UNI_CLUSTER_23', 'FLAG_UNI_CLUSTER_28',
+#        'FLAG_UNI_CLUSTER_29', 'FLAG_UNI_CLUSTER_33', 'FLAG_WEBSITE',
+#        'FLAG_BREAKFAST_VIEWS', 'FLAG_LUNCHTIME_VIEWS', 'FLAG_AFTERNOON_VIEWS',
+#        'FLAG_CATCHUP_VIEWS', 'FLAG_ARCHIVE_VIEWS', 'FLAG_AFF3', 'FLAG_AFF4',
+#        'REGISTRATION_ROUTE_3', 'REGISTRATION_ROUTE_4', 'REGISTRATION_CONTEXT_3',
+#        'REGISTRATION_CONTEXT_6', 'REGISTRATION_CONTEXT_8', 'REGISTRATION_CONTEXT_9',
+#        'REGISTRATION_CONTEXT_10', 'REGISTRATION_CONTEXT_11', 'REGISTRATION_CONTEXT_12',
+#        'REGISTRATION_CONTEXT_13', 'REGISTRATION_CONTEXT_14', 'REGISTRATION_CONTEXT_15',
+#        'REGISTRATION_CONTEXT_16', 'REGISTRATION_CONTEXT_17', 'REGISTRATION_CONTEXT_18',
+#        'REGISTRATION_CONTEXT_19', 'REGISTRATION_CONTEXT_20', 'REGISTRATION_CONTEXT_21',
+#        'REGISTRATION_CONTEXT_22', 'REGISTRATION_CONTEXT_23', 'REGISTRATION_CONTEXT_24',
+#        'REGISTRATION_CONTEXT_25', 'REGISTRATION_CONTEXT_26', 'REGISTRATION_CONTEXT_27',
+#        'MIGRATED_USER_TYPE_5', 'TOD_CENTRE_3', 'CONTENT_CENTRE_1', 'CONTENT_CENTRE_2',
+#        'CONTENT_CENTRE_4', 'CONTENT_CENTRE_5', 'CONTENT_CENTRE_6', 'CONTENT_CENTRE_7',
+#        'CONTENT_CENTRE_8', 'CONTENT_CENTRE_9', 'CONTENT_CENTRE_12','CONTENT_CENTRE_13',
+#        'CONTENT_CENTRE_15']
+#    TO_DROP += [
+#        'SOCIAL_AUTH_TWITTER', 'FLAG_WARD_WKEND_3_9', 'FLAG_UNI_CLUSTER_7',
+#        'FLAG_UNI_CLUSTER_13', 'FLAG_UNI_CLUSTER_21', 'FLAG_UNI_CLUSTER_22',
+#        'FLAG_UNI_CLUSTER_25', 'FLAG_ANDROID', 'FLAG_LATE_PEAK_VIEWS',
+#        'FLAG_NIGHT_TIME_VIEWS', 'FLAG_AFF1', 'FLAG_AFF2', 'MIGRATED_USER_TYPE_4',
+#        'CONTENT_CENTRE_10', 'CONTENT_CENTRE_14', 'CONTENT_CENTRE_16']
+#    TO_DROP += [
+#        'FLAG_WARD_WKDAY_3_9', 'FLAG_UNI_CLUSTER_5', 'FLAG_UNI_CLUSTER_8',
+#        'FLAG_UNI_CLUSTER_9', 'FLAG_UNI_CLUSTER_17', 'FLAG_UNI_CLUSTER_26',
+#        'FLAG_MORNING_VIEWS', 'FLAG_EARLY_PEAK_VIEWS']
+#    TO_DROP += [
+#        'FLAG_WARD_WKEND_1_2', 'FLAG_WARD_WKEND_21_24', 'FLAG_UNI_CLUSTER_1',
+#        'FLAG_UNI_CLUSTER_14', 'FLAG_MAIN', 'FLAG_OTHER_VIEWS', 'CONTENT_CENTRE_11']
+#    TO_DROP += ['FLAG_UNI_CLUSTER_12', 'FLAG_UNI_CLUSTER_19', 'FLAG_UNI_CLUSTER_27']
+#    TO_DROP += ['FLAG_UNI_CLUSTER_11', 'FLAG_UNI_CLUSTER_24'] ## 814000 ?
+#    TO_DROP += ['FLAG_UNI_CLUSTER_2', 'FLAG_UNI_CLUSTER_16']
+#    TO_DROP += ['FLAG_UNI_CLUSTER_10', 'FLAG_UNI_CLUSTER_31', 'FLAG_POST_PEAK_VIEWS', 'TOD_CENTRE_2']
+#    TO_DROP += ['FLAG_UNI_CLUSTER_30']
+#    train_X = train_X.drop(TO_DROP, axis=1)
+
+#    train_X.fillna(-1, inplace=True)
 
     from sklearn.cross_validation import StratifiedKFold
     from sklearn.grid_search import GridSearchCV
@@ -487,18 +397,19 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
     """
 
     param_grid = {
-                #'objective': ['binary:logistic'],
+                #'objective': ['binary:logitraw'],
                 'objective': ['rank:pairwise'],
                 #'booster': ['gblinear'],
-                'n_estimators': [500],
+                'n_estimators': [600],
+
                 'max_depth': [7],
-                #'max_depth': [7],
-                'colsample_bytree': [0.65],
-                'subsample': [0.85],
                 'min_child_weight': [65],
-                'learning_rate': [0.045],
                 'gamma': [0.],
-                'base_score': [0.5]
+
+                'subsample': [0.85],
+                'colsample_bytree': [0.65],
+
+                'learning_rate': [0.045],
                 }
     for k, v in cv_grid.items():
         param_grid[k] = v
@@ -518,6 +429,25 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
         print('  {:s}'.format(item))
     print('best score: {:.5f}'.format(grid.best_score_))
     print('best params:', grid.best_params_)
+
+    if False:
+        clf.fit(train_X, train_y)
+        feature_names = train_X.columns.values.tolist()
+        from numpy import zeros
+        feature_importances = zeros(len(feature_names))
+        importances = clf.booster().get_fscore()
+        for i, feat in enumerate(feature_names):
+            if feat in importances:
+                feature_importances[i] += importances[feat]
+                pass
+            pass
+        import operator
+        sorted_importances = sorted(zip(feature_names, feature_importances), key=operator.itemgetter(1), reverse=True)
+        for k, v in sorted_importances:
+            print("{}\t{}".format(v, k))
+            pass
+        print([k for k, v in sorted_importances if v == 0])
+        pass
 
     return
 
