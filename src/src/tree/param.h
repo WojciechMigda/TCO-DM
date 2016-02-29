@@ -189,6 +189,8 @@ struct TrainParam : public dmlc::Parameter<TrainParam> {
   }
 };
 
+#pragma GCC optimize ( "-O2" )
+
 /*! \brief core statistics used for tree construction */
 struct GradStats {
   /*! \brief sum gradient statistics */
@@ -265,6 +267,8 @@ struct GradStats {
     sum_grad += grad; sum_hess += hess;
   }
 };
+
+#pragma GCC optimize ( "-Os" )
 
 /*!
  * \brief statistics that is helpful to store

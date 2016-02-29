@@ -13,6 +13,8 @@
 #include "../common/bitmap.h"
 #include "../common/sync.h"
 
+#pragma GCC optimize ( "-O2" )
+
 namespace xgboost {
 namespace tree {
 
@@ -894,3 +896,5 @@ XGBOOST_REGISTER_TREE_UPDATER(DistColMaker, "distcol")
   });
 }  // namespace tree
 }  // namespace xgboost
+
+#pragma GCC optimize ( "-Os" )
