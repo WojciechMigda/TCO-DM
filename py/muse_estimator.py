@@ -65,25 +65,80 @@ def OneHot(df, colnames):
     return df
 
 
-from sklearn.base import BaseEstimator, RegressorMixin
-
-
 NOMINALS = ['GENDER', 'REGISTRATION_ROUTE', 'REGISTRATION_CONTEXT',
             'MIGRATED_USER_TYPE', 'PLATFORM_CENTRE', 'TOD_CENTRE',
             'CONTENT_CENTRE']
 
-def work(out_csv_file,
-         estimator,
+
+def MinPRScorer(y_true, y_pred):
+    from sklearn.metrics import precision_score, recall_score
+    P = precision_score(y_true, y_pred)
+    R = recall_score(y_true, y_pred)
+    score = 1000000 * min(P, R)
+
+    return score
+
+
+def EvalMinPRScorer(y_pred, y_true):
+    labels = y_true.get_label()
+    return 'minPR', -MinPRScorer(labels, y_pred > 0.5)
+
+
+#from sklearn.base import BaseEstimator, ClassifierMixin
+from xgb_sklearn import XGBClassifier
+#class MillenialsClassifier(BaseEstimator, ClassifierMixin):
+class MillenialsClassifier(XGBClassifier):
+
+    def __init__(self, max_depth=3, learning_rate=0.1,
+                 n_estimators=100, silent=True,
+                 objective="binary:logistic",
+                 nthread=-1, gamma=0, min_child_weight=1,
+                 max_delta_step=0, subsample=1, colsample_bytree=1, colsample_bylevel=1,
+                 reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
+                 base_score=0.5, seed=0, missing=None):
+        #from xgboost import XGBClassifier
+        #self.estimator = XGBClassifier(
+        super(MillenialsClassifier, self).__init__(
+            max_depth, learning_rate,
+            n_estimators, silent, objective,
+            nthread, gamma, min_child_weight,
+            max_delta_step, subsample,
+            colsample_bytree, colsample_bylevel,
+            reg_alpha, reg_lambda,
+            scale_pos_weight, base_score, seed, missing)
+        pass
+
+
+    def fit(self, X, y):
+        print(self.get_params())
+        #self.estimator.fit(
+        super(MillenialsClassifier, self).fit(
+            X, y,
+            eval_set=[(X, y)],
+            eval_metric=EvalMinPRScorer,
+            #eval_metric="auc",
+            early_stopping_rounds=30,
+            #learning_rates=self.learning_rates,
+            verbose=True,
+            #obj=
+          )
+
+        return self
+
+
+    def predict(self, X):
+        #return self.estimator.predict(X)
+        return super(MillenialsClassifier, self).predict(X)
+
+    pass
+
+
+def work(estimator,
          nest,
          njobs,
          nfolds,
          cv_grid,
-         minimizer,
-         nbuckets,
-         mvector,
-         imputer,
-         clf_kwargs,
-         int_fold):
+         clf_kwargs):
 
     from numpy.random import seed as random_seed
     random_seed(1)
@@ -112,8 +167,8 @@ def work(out_csv_file,
 
     train_X = OneHot(train_X, NOMINALS)
 
-#    train_X['**PROP_PAGE_IMPRESSIONS_DWELL'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['TOTAL_DWELL']
-#    train_X['**PROP_VOD_VIEWS_DWELL'] = train_X['VOD_VIEWS_DWELL'] / train_X['TOTAL_DWELL']
+    train_X['**PROP_PAGE_IMPRESSIONS_DWELL'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['TOTAL_DWELL']
+    train_X['**PROP_VOD_VIEWS_DWELL'] = train_X['VOD_VIEWS_DWELL'] / train_X['TOTAL_DWELL']
 #
 #    train_X['**FLAG_WARD_WKDAY_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKDAY_')]].sum(axis=1)
 #    train_X['**FLAG_WARD_WKEND_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKEND_')]].sum(axis=1)
@@ -124,13 +179,13 @@ def work(out_csv_file,
 #    train_X['**AGE_35'] = train_X['AGE'] < 35
 #    train_X['**AGE_40'] = train_X['AGE'] < 40
 #    train_X['**AGE_45'] = train_X['AGE'] < 45
-#    train_X['**PAGE_IMP_DWELL_PER_DAY'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['REGISTRATION_DAYS']
-#    train_X['**LATE_PAGE_VIEWS_PER_DAY'] = train_X['LATE_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-#    train_X['**TOTAL_DWELL_PER_DAY'] = train_X['TOTAL_DWELL'] / train_X['REGISTRATION_DAYS']
-#    train_X['**AFTERNOON_PAGE_VIEWS_PER_DAY'] = train_X['AFTERNOON_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-#    train_X['**PAGE_IMPRESSION_VISITS_PER_DAY'] = train_X['PAGE_IMPRESSION_VISITS'] / train_X['REGISTRATION_DAYS']
-#    train_X['**LUNCHTIME_PAGE_VIEWS_PER_DAY'] = train_X['LUNCHTIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-#    train_X['**NIGHT_TIME_PAGE_VIEWS_PER_DAY'] = train_X['NIGHT_TIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    train_X['**PAGE_IMP_DWELL_PER_DAY'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['REGISTRATION_DAYS']
+    train_X['**LATE_PAGE_VIEWS_PER_DAY'] = train_X['LATE_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    train_X['**TOTAL_DWELL_PER_DAY'] = train_X['TOTAL_DWELL'] / train_X['REGISTRATION_DAYS']
+    train_X['**AFTERNOON_PAGE_VIEWS_PER_DAY'] = train_X['AFTERNOON_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    train_X['**PAGE_IMPRESSION_VISITS_PER_DAY'] = train_X['PAGE_IMPRESSION_VISITS'] / train_X['REGISTRATION_DAYS']
+    train_X['**LUNCHTIME_PAGE_VIEWS_PER_DAY'] = train_X['LUNCHTIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    train_X['**NIGHT_TIME_PAGE_VIEWS_PER_DAY'] = train_X['NIGHT_TIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
 #    train_X['**BREAKFAST_PAGE_VIEWS_PER_DAY'] = train_X['BREAKFAST_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
 #    train_X['**VIDEO_STOPS_PER_DAY'] = train_X['VIDEO_STOPS'] / train_X['REGISTRATION_DAYS']
 
@@ -210,19 +265,14 @@ def work(out_csv_file,
     for k, v in clf_kwargs.items():
         muse_kwargs[k] = v
         pass
+
     #clf = globals()[estimator](**muse_kwargs)
-    from xgboost import XGBClassifier
+    #from xgboost import XGBClassifier
     clf = XGBClassifier(**muse_kwargs)
+    #clf = MillenialsClassifier(**muse_kwargs)
 
     from sklearn.metrics import make_scorer
-    def TcoScorer(y_true, y_pred):
-        from sklearn.metrics import precision_score, recall_score
-        P = precision_score(y_true, y_pred)
-        R = recall_score(y_true, y_pred)
-        score = 1000000 * min(P, R)
-
-        return score
-    tco_scorer = make_scorer(TcoScorer)
+    tco_scorer = make_scorer(MinPRScorer)
 
     """
 binary:logistic
@@ -400,10 +450,10 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
                 #'objective': ['binary:logitraw'],
                 'objective': ['rank:pairwise'],
                 #'booster': ['gblinear'],
-                'n_estimators': [600],
+                'n_estimators': [580],
 
-                'max_depth': [7],
-                'min_child_weight': [65],
+                'max_depth': [6],
+                'min_child_weight': [45, 50, 55],
                 'gamma': [0.],
 
                 'subsample': [0.85],
@@ -507,34 +557,6 @@ USAGE
             type=int, default=5, action='store', dest="nfolds",
             help="number of cross-validation folds")
 
-        parser.add_argument("--int-fold",
-            type=int, default=6, action='store', dest="int_fold",
-            help="internal fold for PrudentialRegressorCVO2FO")
-
-        parser.add_argument("-b", "--n-buckets",
-            type=int, default=8, action='store', dest="nbuckets",
-            help="number of buckets for digitizer")
-
-        parser.add_argument("-o", "--out-csv",
-            action='store', dest="out_csv_file", default=stdout,
-            type=FileType('w'),
-            help="output CSV file name")
-
-        parser.add_argument("-m", "--minimizer",
-            action='store', dest="minimizer", default='BFGS',
-            type=str, choices=['Powell', 'CG', 'BFGS'],
-            help="minimizer method for scipy.optimize.minimize")
-
-        parser.add_argument("-M", "--mvector",
-            action='store', dest="mvector", default=[-1.5, -2.6, -3.6, -1.2, -0.8, 0.04, 0.7, 3.6],
-            type=float, nargs='*',
-            help="minimizer's initial params vector")
-
-        parser.add_argument("-I", "--imputer",
-            action='store', dest="imputer", default=None,
-            type=str, choices=['mean', 'median', 'most_frequent'],
-            help="Imputer strategy, None is -1")
-
         parser.add_argument("--clf-params",
             type=str, default="{}", action='store', dest="clf_params",
             help="classifier parameters subset to override defaults")
@@ -555,18 +577,12 @@ USAGE
             print(str(k) + ' => ' + str(v))
             pass
 
-        work(args.out_csv_file,
-             args.estimator,
+        work(args.estimator,
              args.nest,
              args.njobs,
              args.nfolds,
              eval(args.cv_grid),
-             args.minimizer,
-             args.nbuckets,
-             args.mvector,
-             args.imputer,
-             eval(args.clf_params),
-             args.int_fold)
+             eval(args.clf_params))
 
 
         return 0
