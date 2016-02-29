@@ -431,6 +431,21 @@ add_column(const array2d<_Type> & left, const std::vector<_Type> & col)
 
 template<typename _Type>
 array2d<_Type>
+add_column(const array2d<_Type> & left, const std::valarray<_Type> & col)
+{
+    assert(left.shape().first == col.size());
+
+    array2d<_Type> newmat = zeros<_Type>({left.shape().first, left.shape().second + 1});
+
+    newmat[newmat.columns(0, -2)] = left[left.columns(0, -1)];
+    newmat[newmat.columns(-1, -1)] = col;
+
+    return newmat;
+}
+
+
+template<typename _Type>
+array2d<_Type>
 add_columns(const array2d<_Type> & left, const array2d<_Type> & right)
 {
     assert(left.shape().first == right.shape().first);
