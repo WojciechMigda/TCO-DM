@@ -312,6 +312,18 @@ one_hot(const num::array2d<real_type> & what, std::vector<std::string> & colname
         {
             colnames.emplace_back(colname + "_" + std::to_string(dummy + 1));
         }
+
+        {
+            const std::size_t ndummies = dummies.shape().second;
+
+            const std::valarray<real_type> first_dummy = dummies[dummies.column(0)];
+            const std::valarray<real_type> nth_df = newmat[newmat.column(-ndummies)];
+            assert(std::equal(std::begin(first_dummy), std::end(first_dummy), std::begin(nth_df)));
+
+            const std::valarray<real_type> last_dummy = dummies[dummies.column(-1)];
+            const std::valarray<real_type> last_df = newmat[newmat.column(-1)];
+            assert(std::equal(std::begin(last_dummy), std::end(last_dummy), std::begin(last_df)));
+        }
     }
 
     // we will only delete columns right-to-left
@@ -362,6 +374,24 @@ binary_prop(
     return newmat;
 }
 
+
+bool
+no_column_is_all_zeros(const num::array2d<real_type> & what)
+{
+    const std::size_t ncols = what.shape().second;
+
+    for (std::size_t idx{0}; idx < ncols; ++idx)
+    {
+        const num::array2d<real_type>::varray_type col = what[what.column(idx)];
+        if (std::all_of(std::begin(col), std::end(col), [](real_type x){return x == 0.0;}))
+        {
+            std::cerr << "Columns " << idx << " is all zeros" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
+}
 
 std::vector<int>
 DemographicMembership::predict(const int test_type,
@@ -432,6 +462,10 @@ DemographicMembership::predict(const int test_type,
             )
         );
 
+
+    assert(no_column_is_all_zeros(i_train_data));
+    assert(no_column_is_all_zeros(i_test_data));
+
     // retrieve response vector
     const array_type::varray_type train_y_valarr = i_train_data[i_train_data.column(-1)];
     const std::vector<float> train_y(std::begin(train_y_valarr), std::end(train_y_valarr));
@@ -451,6 +485,9 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "test_data shape: " << test_data.shape() << std::endl;
 
+    assert(no_column_is_all_zeros(train_data));
+    assert(no_column_is_all_zeros(test_data));
+
     {
         array_type full_data({train_data.shape().first + test_data.shape().first, train_data.shape().second}, 0);
         full_data[full_data.rows(0, train_data.shape().first - 1)] = train_data[train_data.rows(0, -1)];
@@ -458,27 +495,41 @@ DemographicMembership::predict(const int test_type,
 
         const auto & c_full_data(full_data);
 
-        full_data = one_hot(full_data, colnames, {1, 2, 3, 7, 231, 232, 233});
+        full_data = one_hot(full_data, colnames,
+            {
+                colidx(colnames, "GENDER"),
+                colidx(colnames, "REGISTRATION_ROUTE"),
+                colidx(colnames, "REGISTRATION_CONTEXT"),
+                colidx(colnames, "MIGRATED_USER_TYPE"),
+                colidx(colnames, "PLATFORM_CENTRE"),
+                colidx(colnames, "TOD_CENTRE"),
+                colidx(colnames, "CONTENT_CENTRE"),
+            });
 
         assert(colnames.size() == full_data.shape().second);
+        assert(no_column_is_all_zeros(full_data));
+
 
         // <<< feature engineering
 
         full_data = binary_prop(full_data, colnames, "PROP_PAGE_IMPRESSIONS_DWELL", "PAGE_IMPRESSIONS_DWELL", "TOTAL_DWELL");
         full_data = binary_prop(full_data, colnames, "PROP_VOD_VIEWS_DWELL", "VOD_VIEWS_DWELL", "TOTAL_DWELL");
 
-//        full_data = binary_prop(full_data, colnames, "LATE_PAGE_VIEWS_PER_DAY", "LATE_PAGE_VIEWS", "REGISTRATION_DAYS");
-//        full_data = binary_prop(full_data, colnames, "AFTERNOON_PAGE_VIEWS_PER_DAY", "AFTERNOON_PAGE_VIEWS", "REGISTRATION_DAYS");
-//        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSIONS_DWELL_PER_DAY", "PAGE_IMPRESSIONS_DWELL", "REGISTRATION_DAYS");
-//        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSION_VISITS_PER_DAY", "PAGE_IMPRESSION_VISITS", "REGISTRATION_DAYS");
-//        full_data = binary_prop(full_data, colnames, "LUNCHTIME_PAGE_VIEWS_PER_DAY", "LUNCHTIME_PAGE_VIEWS", "REGISTRATION_DAYS");
-//
-//        full_data = binary_prop(full_data, colnames, "TOTAL_DWELL_PER_DAY", "TOTAL_DWELL", "REGISTRATION_DAYS");
-//        full_data = binary_prop(full_data, colnames, "NIGHT_TIME_PAGE_VIEWS_DAY", "NIGHT_TIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "LATE_PAGE_VIEWS_PER_DAY", "LATE_PAGE_VIEWS", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "AFTERNOON_PAGE_VIEWS_PER_DAY", "AFTERNOON_PAGE_VIEWS", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSIONS_DWELL_PER_DAY", "PAGE_IMPRESSIONS_DWELL", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSION_VISITS_PER_DAY", "PAGE_IMPRESSION_VISITS", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "LUNCHTIME_PAGE_VIEWS_PER_DAY", "LUNCHTIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+
+        full_data = binary_prop(full_data, colnames, "TOTAL_DWELL_PER_DAY", "TOTAL_DWELL", "REGISTRATION_DAYS");
+        full_data = binary_prop(full_data, colnames, "NIGHT_TIME_PAGE_VIEWS_DAY", "NIGHT_TIME_PAGE_VIEWS", "REGISTRATION_DAYS");
 
         assert(colnames.size() == full_data.shape().second);
 
         // >>> feature engineering
+
+
+        assert(no_column_is_all_zeros(full_data));
 
         train_data = array_type(
             {train_data.shape().first, full_data.shape().second},
@@ -505,7 +556,7 @@ DemographicMembership::predict(const int test_type,
         {"missing", "nan"},
         {"max_delta_step", "0"},
         {"base_score", "0.5"},
-        {"n_estimators", "500"},
+        {"n_estimators", "600"},
         {"subsample", "0.85"},
         {"reg_lambda", "1"},
         {"seed", "0"},
@@ -516,6 +567,8 @@ DemographicMembership::predict(const int test_type,
         {"gamma", "0"}
     };
 
+    std::cerr << "Training.." << std::endl;
+
     auto booster = XGB::fit(train_data, train_y, params, std::stoi(params.at("n_estimators")));
 
     const auto y_hat_proba = XGB::predict(booster.get(), test_data);
@@ -524,7 +577,7 @@ DemographicMembership::predict(const int test_type,
     std::transform(y_hat_proba.cbegin(), y_hat_proba.cend(), y_hat.begin(),
         [](const float what)
         {
-            return what > 0.5;
+            return what > 0.50;
         }
     );
 
