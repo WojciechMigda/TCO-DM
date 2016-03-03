@@ -170,10 +170,128 @@ const std::map<const std::string, const std::string> sub24
     {"seed", "0"},
     {"min_child_weight", "130"},
 
-        {"num_pairsample", "2"},
-
     {"objective", "rank:pairwise"},
     {"max_depth", "6"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub10
+{
+    // sub8, n_estimators=650
+
+    // LB: 810446.95
+    // CV: 809241
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "650"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub13
+{
+    // sub8, subsample=0.8
+
+    // LB: 810079.63
+    // CV: 809129
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.8"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub9
+{
+    // sub8, n_estimators=700
+
+    // LB: 809303.95
+    // CV: 807533
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "700"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub11
+{
+    // sub8, n_estimators=550
+
+    // LB: 809167.39
+    // CV: 811629
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "550"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
     {"gamma", "0"}
 };
 
