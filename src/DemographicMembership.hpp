@@ -28,6 +28,8 @@
 #include "num.hpp"
 #include "array2d.hpp"
 
+#include "param_store.hpp"
+
 #include "xgboost/c_api.h"
 
 #include <vector>
@@ -559,42 +561,15 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "OneHot/FE train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
-    // booster parameters
-    const std::map<const std::string, const std::string> params
-    {
-//        {"booster", "gblinear"},
-        {"booster", "gbtree"}, // default
-        {"reg_alpha", "0"},
-        {"colsample_bytree", "0.7709"},
-        {"silent", "1"},
-        {"colsample_bylevel", "1"},
-        {"scale_pos_weight", "1"},
-        {"learning_rate", "0.045"},
-        {"missing", "nan"},
-        {"max_delta_step", "0"},
-        {"base_score", "0.5"},
-        {"n_estimators", "600"},
-        {"subsample", "0.6549"},
-        {"reg_lambda", "1"},
-        {"seed", "0"},
-        {"min_child_weight", "85"},
-
-        {"objective", "rank:pairwise"},
-//        {"objective", "binary:logitraw"},
-//        {"objective", "binary:logistic"},
-        {"max_depth", "5"},
-        {"gamma", "0.7745"}
-    };
-
 
     constexpr int   TIME_MARGIN{15};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
-    const int       MAX_ITER = std::stoi(params.at("n_estimators"));
+    const int       MAX_ITER = std::stoi(params::CURRENT.at("n_estimators"));
     int iter{0};
 
     std::cerr << "Training.. (time limit: " << TIME_LIMITS[test_type] << " secs)" << std::endl;
 
-    auto booster = XGB::fit(train_data, train_y, params,
+    auto booster = XGB::fit(train_data, train_y, params::CURRENT,
         [&iter, &MAX_ITER, MAX_TIMESTAMP]() -> bool
         {
             const bool running = (iter < MAX_ITER) && (timestamp() < MAX_TIMESTAMP);
