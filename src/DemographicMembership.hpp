@@ -362,9 +362,9 @@ num::array2d<real_type>
 binary_prop(
     const num::array2d<real_type> & what,
     std::vector<std::string> & colnames,
-    std::string && newcol,
-    std::string && lhs,
-    std::string && rhs)
+    const std::string & newcol,
+    const std::string & lhs,
+    const std::string & rhs)
 {
     num::array2d<real_type> newmat(what);
 
@@ -569,9 +569,9 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
 //    const std::map<const std::string, const std::string> & PARAMS(params::CURRENT);
-    const std::map<const std::string, const std::string> & PARAMS(params::sub17);
+    const std::map<const std::string, const std::string> & PARAMS(params::sub3);
 
-    constexpr int   TIME_MARGIN{15};
+    constexpr int   TIME_MARGIN{60};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
     const int       MAX_ITER = std::stoi(PARAMS.at("n_estimators"));
     int iter{0};
