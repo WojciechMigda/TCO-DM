@@ -28,32 +28,94 @@
 namespace params
 {
 
+// rank:pairwise
+// best score: 815135.60524
+// best params: {'n_estimators': 510, 'subsample': 0.6399543679962626, 'colsample_bytree': 0.6612120010371612,
+// 'max_depth': 7, 'min_child_weight': 135}
+// ---------------
+// best score: 814001.18640
+// best params: {'n_estimators': 530, 'subsample': 0.6410812525524375, 'colsample_bytree': 0.5895782044640605,
+// 'max_depth': 7, 'min_child_weight': 135}
+
+// best score: 813737.46276
+// best params: {'colsample_bytree': 0.5235071920939005, 'min_child_weight': 225, 'num_pairsample': 3,
+// 'n_estimators': 740, 'subsample': 0.5008072038378799, 'objective': 'rank:pairwise', 'max_depth': 8}
+
+
+// best score: 814643.09775
+// best params: {'colsample_bytree': 0.4156165269795621, 'scale_pos_weight': 0.3959258247559913,
+// 'min_child_weight': 55, 'n_estimators': 560, 'subsample': 0.7262267395602292, 'objective': 'binary:logistic',
+// 'max_depth': 6, 'gamma': 1.18681684221414}
+// -------------------
+// best score: 814427.55776
+// best params: {'colsample_bytree': 0.7164099207357719, 'scale_pos_weight': 0.3948607027148843,
+// 'min_child_weight': 70, 'n_estimators': 530, 'subsample': 0.7963089255980069, 'objective': 'binary:logistic',
+// 'max_depth': 4, 'gamma': 1.443989391942047}
+
+
 
 const std::map<const std::string, const std::string> CURRENT
 {
 //    {"booster", "gblinear"},
     {"booster", "gbtree"},
     {"reg_alpha", "0"},
-    {"colsample_bytree", "0.65"},
+    {"colsample_bytree", "0.7383538426315808"},
     {"silent", "1"},
     {"colsample_bylevel", "1"},
-    {"scale_pos_weight", "1"},
+    {"scale_pos_weight", "0.40794377329914555"},
     {"learning_rate", "0.045"},
     {"missing", "nan"},
     {"max_delta_step", "0"},
     {"base_score", "0.5"},
-    {"n_estimators", "600"},
-    {"subsample", "0.85"},
+    {"n_estimators", "590"},
+    {"subsample", "0.7652394081294241"},
     {"reg_lambda", "1"},
     {"seed", "0"},
-    {"min_child_weight", "65"},
+    {"min_child_weight", "60"},
 
-    {"objective", "rank:pairwise"},
-    {"num_pairsample", "2"},
+//    {"objective", "rank:pairwise"},
+//    {"num_pairsample", "2"},
 //    {"objective", "binary:logitraw"},
-//    {"objective", "binary:logistic"},
-    {"max_depth", "7"},
-    {"gamma", "0"}
+    {"objective", "binary:logistic"},
+    {"max_depth", "4"},
+    {"gamma", "0.9996994618481485"}
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
+const std::map<const std::string, const std::string> sub39
+{
+    // best score: 814667.07663
+    // best params: {'colsample_bytree': 0.7383538426315808, 'scale_pos_weight': 0.40794377329914555,
+    // 'min_child_weight': 60, 'n_estimators': 590, 'subsample': 0.7652394081294241, 'objective': 'binary:logistic',
+    // 'max_depth': 4, 'gamma': 0.9996994618481485}
+
+    // LB: 811104.3
+    // CV: 812550
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.7383538426315808"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.40794377329914555"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "590"},
+    {"subsample", "0.7652394081294241"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "60"},
+
+    {"objective", "binary:logistic"},
+    {"max_depth", "4"},
+    {"gamma", "0.9996994618481485"}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -330,6 +392,131 @@ const std::map<const std::string, const std::string> sub11
 };
 
 
+const std::map<const std::string, const std::string> sub12
+{
+    // sub8 + subsample=0.9,colsample_by_tree=0.67
+
+    // LB: 806501.60
+    // CV: 810355
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.67"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.9"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub25
+{
+    // hyperopt.4.sorted.log, best ranked
+    // best score: 813859.62624
+    // best params: {'n_estimators': 650, 'subsample': 0.8029650963196207,
+    // 'colsample_bytree': 0.436229760798959, 'max_depth': 7, 'min_child_weight': 100}
+
+
+    // LB: 806383.80
+    // CV: 813336
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.4362"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "650"},
+    {"subsample", "0.8030"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "100"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub3
+{
+    // sub8, n_estimators=500
+
+    // LB: 805800.36
+    // CV: 812613
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "500"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub7
+{
+    // sub3, MISSING=-1
+
+    // LB: 804689.03
+    // CV: .
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "500"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+
 
 
 
@@ -400,6 +587,38 @@ const std::map<const std::string, const std::string> sub36
 };
 
 
+const std::map<const std::string, const std::string> sub38
+{
+    // sub8 + num_pairsample=2
+
+    // LB: 801095.25
+    // CV: 813410
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"num_pairsample", "2"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -424,6 +643,36 @@ const std::map<const std::string, const std::string> sub18
     {"max_delta_step", "0"},
     {"base_score", "0.5"},
     {"n_estimators", "600"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub6
+{
+    // sub3, top-2 FE
+
+    // LB: 805800.36
+    // CV: .
+    // top-2 FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "500"},
     {"subsample", "0.85"},
     {"reg_lambda", "1"},
     {"seed", "0"},
@@ -562,6 +811,165 @@ const std::map<const std::string, const std::string> sub14
 };
 
 
+const std::map<const std::string, const std::string> sub17
+{
+    // LB: 807893.78
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "750"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "60"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "6"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub16
+{
+    // sub17 n_estimators=700
+
+    // LB: 807723.33
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "700"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "60"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "6"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub21
+{
+    // hyperopt.2.sorted.log, second best entry, done at nest=600
+
+    // best score: 814138.30899
+    // best params: {'n_estimators': 520, 'subsample': 0.8850442710992165,
+    // 'colsample_bytree': 0.5598635956943869, 'min_child_weight': 70}
+
+
+    // LB: 807714.72
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5599"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.8850"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "70"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub28
+{
+    // best ranked from hyperopt.rank.pairwise.1.log
+
+    // best score: 814524.23995
+    // best params: {'colsample_bytree': 0.5486886032198215, 'min_child_weight': 150,
+    // 'n_estimators': 670, 'subsample': 0.8171114174908516, 'max_depth': 8, 'gamma': 0.1652567602745394}
+
+
+    // LB: 803964.73
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5487"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "670"},
+    {"subsample", "0.8171"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "150"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "8"},
+    {"gamma", "0.1653"}
+};
+
+
+const std::map<const std::string, const std::string> sub22
+{
+    // from hyperopt.2.sorted.log, best entry scored at 814158.03998 with 570 estimators
+    // {'n_estimators': 570, 'subsample': 0.8546865430244482, 'colsample_bytree': 0.562540029980502, 'min_child_weight': 90}
+
+    // LB: 808315.02
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5625"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "570"},
+    {"subsample", "0.8547"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "90"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -595,6 +1003,65 @@ const std::map<const std::string, const std::string> sub31
     {"objective", "binary:logitraw"},
     {"max_depth", "4"},
     {"gamma", "0.5390"}
+};
+
+
+const std::map<const std::string, const std::string> sub27
+{
+    // LB: 806684.54
+    // CV: .
+    // FE full
+
+    {"booster", "gblinear"}, // !!!!!!!!!!!!!!!!!!!!!!!!!!! pomylka? 0:46 w nocy
+//        {"booster", "gbtree"}, // default
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.7"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "65"},
+
+    {"objective", "binary:logitraw"},
+    {"max_depth", "7"},
+    {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub15
+{
+    // sub17 n_estimators=600
+
+    // LB: 801164.08
+    // CV: .
+    // FE full
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.65"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "1"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "600"},
+    {"subsample", "0.85"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "60"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "6"},
+    {"gamma", "0"}
 };
 
 
