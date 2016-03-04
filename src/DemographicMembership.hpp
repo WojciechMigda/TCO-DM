@@ -399,11 +399,15 @@ no_column_is_all_zeros(const num::array2d<real_type> & what)
     return true;
 }
 
-
-auto timestamp = []()
+#include <sys/time.h>
+long int timestamp()
 {
-    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-};
+//    return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    timeval tv;
+    gettimeofday(&tv, NULL);
+
+    return tv.tv_sec;// + tv.tv_usec / 1e6;
+}
 
 
 std::vector<int>
@@ -531,17 +535,20 @@ DemographicMembership::predict(const int test_type,
 
         // <<< feature engineering
 
-        full_data = binary_prop(full_data, colnames, "PROP_PAGE_IMPRESSIONS_DWELL", "PAGE_IMPRESSIONS_DWELL", "TOTAL_DWELL");
-        full_data = binary_prop(full_data, colnames, "PROP_VOD_VIEWS_DWELL", "VOD_VIEWS_DWELL", "TOTAL_DWELL");
+        if (false)
+        {
+            full_data = binary_prop(full_data, colnames, "PROP_PAGE_IMPRESSIONS_DWELL", "PAGE_IMPRESSIONS_DWELL", "TOTAL_DWELL");
+            full_data = binary_prop(full_data, colnames, "PROP_VOD_VIEWS_DWELL", "VOD_VIEWS_DWELL", "TOTAL_DWELL");
 
-        full_data = binary_prop(full_data, colnames, "LATE_PAGE_VIEWS_PER_DAY", "LATE_PAGE_VIEWS", "REGISTRATION_DAYS");
-        full_data = binary_prop(full_data, colnames, "AFTERNOON_PAGE_VIEWS_PER_DAY", "AFTERNOON_PAGE_VIEWS", "REGISTRATION_DAYS");
-        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSIONS_DWELL_PER_DAY", "PAGE_IMPRESSIONS_DWELL", "REGISTRATION_DAYS");
-        full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSION_VISITS_PER_DAY", "PAGE_IMPRESSION_VISITS", "REGISTRATION_DAYS");
-        full_data = binary_prop(full_data, colnames, "LUNCHTIME_PAGE_VIEWS_PER_DAY", "LUNCHTIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "LATE_PAGE_VIEWS_PER_DAY", "LATE_PAGE_VIEWS", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "AFTERNOON_PAGE_VIEWS_PER_DAY", "AFTERNOON_PAGE_VIEWS", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSIONS_DWELL_PER_DAY", "PAGE_IMPRESSIONS_DWELL", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "PAGE_IMPRESSION_VISITS_PER_DAY", "PAGE_IMPRESSION_VISITS", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "LUNCHTIME_PAGE_VIEWS_PER_DAY", "LUNCHTIME_PAGE_VIEWS", "REGISTRATION_DAYS");
 
-        full_data = binary_prop(full_data, colnames, "TOTAL_DWELL_PER_DAY", "TOTAL_DWELL", "REGISTRATION_DAYS");
-        full_data = binary_prop(full_data, colnames, "NIGHT_TIME_PAGE_VIEWS_DAY", "NIGHT_TIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "TOTAL_DWELL_PER_DAY", "TOTAL_DWELL", "REGISTRATION_DAYS");
+            full_data = binary_prop(full_data, colnames, "NIGHT_TIME_PAGE_VIEWS_DAY", "NIGHT_TIME_PAGE_VIEWS", "REGISTRATION_DAYS");
+        }
 
         assert(colnames.size() == full_data.shape().second);
 
@@ -561,15 +568,17 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "OneHot/FE train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
+//    const std::map<const std::string, const std::string> & PARAMS(params::CURRENT);
+    const std::map<const std::string, const std::string> & PARAMS(params::sub17);
 
     constexpr int   TIME_MARGIN{15};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
-    const int       MAX_ITER = std::stoi(params::CURRENT.at("n_estimators"));
+    const int       MAX_ITER = std::stoi(PARAMS.at("n_estimators"));
     int iter{0};
 
     std::cerr << "Training.. (time limit: " << TIME_LIMITS[test_type] << " secs)" << std::endl;
 
-    auto booster = XGB::fit(train_data, train_y, params::CURRENT,
+    auto booster = XGB::fit(train_data, train_y, PARAMS,
         [&iter, &MAX_ITER, MAX_TIMESTAMP]() -> bool
         {
             const bool running = (iter < MAX_ITER) && (timestamp() < MAX_TIMESTAMP);
