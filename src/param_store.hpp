@@ -28,30 +28,114 @@
 namespace params
 {
 
-// rank:pairwise
-// best score: 815135.60524
-// best params: {'n_estimators': 510, 'subsample': 0.6399543679962626, 'colsample_bytree': 0.6612120010371612,
-// 'max_depth': 7, 'min_child_weight': 135}
-// ---------------
-// best score: 814001.18640
-// best params: {'n_estimators': 530, 'subsample': 0.6410812525524375, 'colsample_bytree': 0.5895782044640605,
-// 'max_depth': 7, 'min_child_weight': 135}
-
-// best score: 813737.46276
-// best params: {'colsample_bytree': 0.5235071920939005, 'min_child_weight': 225, 'num_pairsample': 3,
-// 'n_estimators': 740, 'subsample': 0.5008072038378799, 'objective': 'rank:pairwise', 'max_depth': 8}
-
-
 // best score: 814643.09775
 // best params: {'colsample_bytree': 0.4156165269795621, 'scale_pos_weight': 0.3959258247559913,
 // 'min_child_weight': 55, 'n_estimators': 560, 'subsample': 0.7262267395602292, 'objective': 'binary:logistic',
 // 'max_depth': 6, 'gamma': 1.18681684221414}
+// CV: 812335
+#if 0
+{"booster", "gbtree"},
+{"reg_alpha", "0"},
+{"colsample_bytree", "0.4156165269795621"},
+{"silent", "1"},
+{"colsample_bylevel", "1"},
+{"scale_pos_weight", "0.3959258247559913"},
+{"learning_rate", "0.045"},
+{"missing", "nan"},
+{"max_delta_step", "0"},
+{"base_score", "0.5"},
+{"n_estimators", "560"},
+{"subsample", "0.7262267395602292"},
+{"reg_lambda", "1"},
+{"seed", "0"},
+{"min_child_weight", "55"},
+
+{"objective", "binary:logistic"},
+{"max_depth", "6"},
+{"gamma", "1.18681684221414"}
+#endif
 // -------------------
 // best score: 814427.55776
 // best params: {'colsample_bytree': 0.7164099207357719, 'scale_pos_weight': 0.3948607027148843,
 // 'min_child_weight': 70, 'n_estimators': 530, 'subsample': 0.7963089255980069, 'objective': 'binary:logistic',
 // 'max_depth': 4, 'gamma': 1.443989391942047}
+// CV: 813546
+#if 0
+{"booster", "gbtree"},
+{"reg_alpha", "0"},
+{"colsample_bytree", "0.7164099207357719"},
+{"silent", "1"},
+{"colsample_bylevel", "1"},
+{"scale_pos_weight", "0.3948607027148843"},
+{"learning_rate", "0.045"},
+{"missing", "nan"},
+{"max_delta_step", "0"},
+{"base_score", "0.5"},
+{"n_estimators", "530"},
+{"subsample", "0.7963089255980069"},
+{"reg_lambda", "1"},
+{"seed", "0"},
+{"min_child_weight", "70"},
 
+{"objective", "binary:logistic"},
+{"max_depth", "4"},
+{"gamma", "1.443989391942047"}
+#endif
+
+//////////////////// hyper.rank.f20.noFE.log
+// rank:pairwise
+// best score: 815135.60524
+// best params: {'n_estimators': 510, 'subsample': 0.6399543679962626, 'colsample_bytree': 0.6612120010371612,
+// 'max_depth': 7, 'min_child_weight': 135}
+// CV: 811628
+#if 0
+{"booster", "gbtree"},
+{"reg_alpha", "0"},
+{"colsample_bytree", "0.6612120010371612"},
+{"silent", "1"},
+{"colsample_bylevel", "1"},
+{"scale_pos_weight", "0.3948607027148843"},
+{"learning_rate", "0.045"},
+{"missing", "nan"},
+{"max_delta_step", "0"},
+{"base_score", "0.5"},
+{"n_estimators", "510"},
+{"subsample", "0.6399543679962626"},
+{"reg_lambda", "1"},
+{"seed", "0"},
+{"min_child_weight", "135"},
+
+{"objective", "rank:pairwise"},
+{"max_depth", "7"},
+#endif
+// ---------------
+// best score: 814001.18640
+// best params: {'n_estimators': 530, 'subsample': 0.6410812525524375, 'colsample_bytree': 0.5895782044640605,
+// 'max_depth': 7, 'min_child_weight': 135}
+// CV: 812609
+// ~~CV: 810261(600 est)
+#if 0
+{"booster", "gbtree"},
+{"reg_alpha", "0"},
+{"colsample_bytree", "0.5895782044640605"},
+{"silent", "1"},
+{"colsample_bylevel", "1"},
+{"scale_pos_weight", "0.3948607027148843"},
+{"learning_rate", "0.045"},
+{"missing", "nan"},
+{"max_delta_step", "0"},
+{"base_score", "0.5"},
+{"n_estimators", "530"},
+{"subsample", "0.6410812525524375"},
+{"reg_lambda", "1"},
+{"seed", "0"},
+{"min_child_weight", "135"},
+
+{"objective", "rank:pairwise"},
+{"max_depth", "7"},
+#endif
+
+/////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
 
 
 const std::map<const std::string, const std::string> CURRENT
@@ -59,26 +143,63 @@ const std::map<const std::string, const std::string> CURRENT
 //    {"booster", "gblinear"},
     {"booster", "gbtree"},
     {"reg_alpha", "0"},
-    {"colsample_bytree", "0.7383538426315808"},
+    {"colsample_bytree", "0.5235071920939005"},
     {"silent", "1"},
     {"colsample_bylevel", "1"},
-    {"scale_pos_weight", "0.40794377329914555"},
+    {"scale_pos_weight", "0.3948607027148843"},
     {"learning_rate", "0.045"},
     {"missing", "nan"},
     {"max_delta_step", "0"},
     {"base_score", "0.5"},
-    {"n_estimators", "590"},
-    {"subsample", "0.7652394081294241"},
+    {"n_estimators", "740"},
+    {"subsample", "0.5008072038378799"},
     {"reg_lambda", "1"},
     {"seed", "0"},
-    {"min_child_weight", "60"},
+    {"min_child_weight", "225"},
 
-//    {"objective", "rank:pairwise"},
-//    {"num_pairsample", "2"},
+    {"objective", "rank:pairwise"},
+    {"num_pairsample", "3"},
 //    {"objective", "binary:logitraw"},
-    {"objective", "binary:logistic"},
-    {"max_depth", "4"},
-    {"gamma", "0.9996994618481485"}
+//    {"objective", "binary:logistic"},
+    {"max_depth", "8"},
+//    {"gamma", "1.443989391942047"}
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+const std::map<const std::string, const std::string> sub40
+{
+    // best entry from hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
+
+    // best score: 813737.46276
+    // best params: {'colsample_bytree': 0.5235071920939005, 'min_child_weight': 225, 'num_pairsample': 3,
+    // 'n_estimators': 740, 'subsample': 0.5008072038378799, 'objective': 'rank:pairwise', 'max_depth': 8}
+
+    // CV: 812692
+    // LB: 811878.79
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5235071920939005"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3948607027148843"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "740"},
+    {"subsample", "0.5008072038378799"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "225"},
+
+    {"objective", "rank:pairwise"},
+    {"num_pairsample", "3"},
+    {"max_depth", "8"},
 };
 
 
@@ -88,7 +209,8 @@ const std::map<const std::string, const std::string> CURRENT
 
 const std::map<const std::string, const std::string> sub39
 {
-    // best score: 814667.07663
+    // best score: 814667.07663 from hyper.binlogistic.f10.noFE.log
+
     // best params: {'colsample_bytree': 0.7383538426315808, 'scale_pos_weight': 0.40794377329914555,
     // 'min_child_weight': 60, 'n_estimators': 590, 'subsample': 0.7652394081294241, 'objective': 'binary:logistic',
     // 'max_depth': 4, 'gamma': 0.9996994618481485}
