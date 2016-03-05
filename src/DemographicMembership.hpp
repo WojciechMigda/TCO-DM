@@ -568,32 +568,81 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "OneHot/FE train_data shape: " << train_data.shape() << std::endl;
     std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
-//    const std::map<const std::string, const std::string> & PARAMS(params::CURRENT);
-    const std::map<const std::string, const std::string> & PARAMS(params::sub44);
 
     constexpr int   TIME_MARGIN{60};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
-    const int       MAX_ITER = std::stoi(PARAMS.at("n_estimators"));
-    int iter{0};
 
-    std::cerr << "Training.. (time limit: " << TIME_LIMITS[test_type] << " secs)" << std::endl;
+//    const std::map<const std::string, const std::string> & PARAMS_SET[] = {params::CURRENT};
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub46};
 
-    auto booster = XGB::fit(train_data, train_y, PARAMS,
-        [&iter, &MAX_ITER, MAX_TIMESTAMP]() -> bool
-        {
-            const bool running = (iter < MAX_ITER) && (timestamp() < MAX_TIMESTAMP);
-            ++iter;
-            return running == false;
-        }
-    );
+    ////////////////////////////////////////////////////////////////////////////
+    // CV: 809750
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39};
+    // CV: 811757
+    // CV(0/1): 813376
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40};
+    // CV: 812233
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub43};
 
-    const auto y_hat_proba = XGB::predict(booster.get(), test_data);
+    //// no sub8 //////////////////////////////////////////
+    // CV: 815265
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40};
+    // CV: 814939
+    // CV(0/1): 813603
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub43};
+    // CV: 813696
+    // CV(0/1): 813998
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46};
 
+    std::cerr <<std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
+    std::cerr << "Total time limit: " << TIME_LIMITS[test_type] << " secs" << std::endl;
+
+
+    // collection of probabilities predicted by each estimator
+    std::vector<std::vector<float>> y_hat_proba_set;
+
+    for (const auto & PARAMS_p : PARAMS_SET)
+    {
+        const int MAX_ITER = std::stoi(PARAMS_p->at("n_estimators"));
+        int iter{0};
+
+        auto booster = XGB::fit(train_data, train_y, *PARAMS_p,
+            [&iter, &MAX_ITER, MAX_TIMESTAMP]() -> bool
+            {
+                const bool running = (iter < MAX_ITER) && (timestamp() < MAX_TIMESTAMP);
+                ++iter;
+                return running == false;
+            }
+        );
+
+        std::cerr << iter << " / " << MAX_ITER << std::endl;
+
+        y_hat_proba_set.push_back(XGB::predict(booster.get(), test_data));
+    }
+
+    // array of propabilities accumulated from completed estimators
+    std::vector<float> y_hat_proba_cumm(test_data.shape().first, 0.);
+
+    for (int idx{0}; idx < y_hat_proba_set.size(); ++idx)
+    {
+        std::transform(y_hat_proba_set[idx].cbegin(), y_hat_proba_set[idx].cend(), y_hat_proba_cumm.begin(),
+            y_hat_proba_cumm.begin(),
+            [](const float x, const float a)
+            {
+//                return a + (x > 0.5);
+                return a + x;
+            });
+    }
+
+    // quantized prediction
     std::vector<int> y_hat(test_data.shape().first);
-    std::transform(y_hat_proba.cbegin(), y_hat_proba.cend(), y_hat.begin(),
-        [](const float what)
+
+    std::transform(y_hat_proba_cumm.cbegin(), y_hat_proba_cumm.cend(), y_hat.begin(),
+        [&y_hat_proba_set](const float what)
         {
-            return what > 0.50;
+            const float mean = what / y_hat_proba_set.size();
+
+            return mean > 0.50;
         }
     );
 
