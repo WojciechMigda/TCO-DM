@@ -28,33 +28,26 @@
 namespace params
 {
 
-// best score: 814643.09775
-// best params: {'colsample_bytree': 0.4156165269795621, 'scale_pos_weight': 0.3959258247559913,
-// 'min_child_weight': 55, 'n_estimators': 560, 'subsample': 0.7262267395602292, 'objective': 'binary:logistic',
-// 'max_depth': 6, 'gamma': 1.18681684221414}
-// CV: 812335
-#if 0
-{"booster", "gbtree"},
-{"reg_alpha", "0"},
-{"colsample_bytree", "0.4156165269795621"},
-{"silent", "1"},
-{"colsample_bylevel", "1"},
-{"scale_pos_weight", "0.3959258247559913"},
-{"learning_rate", "0.045"},
-{"missing", "nan"},
-{"max_delta_step", "0"},
-{"base_score", "0.5"},
-{"n_estimators", "560"},
-{"subsample", "0.7262267395602292"},
-{"reg_lambda", "1"},
-{"seed", "0"},
-{"min_child_weight", "55"},
+// hyper.binlogitraw.2.f10.noFE.log
+// 1.
+// best score: 814984.82934  best params: {'colsample_bytree': 0.7640052598785774,
+// 'scale_pos_weight': 0.7135239801678219, 'min_child_weight': 55, 'n_estimators': 760,
+// 'subsample': 0.5452538000685805, 'objective': 'binary:logitraw', 'max_depth': 5, 'gamma': 0.9751037278636211}
+// 2.
+// best score: 814959.85754  best params: {'colsample_bytree': 0.8713724505384853,
+// 'scale_pos_weight': 0.682580867766655, 'min_child_weight': 85, 'n_estimators': 590,
+// 'subsample': 0.8051026646094943, 'objective': 'binary:logitraw', 'max_depth': 4, 'gamma': 1.4120960639617184}
+// 3.
+// best score: 814591.89169  best params: {'colsample_bytree': 0.9705978190927813,
+// 'scale_pos_weight': 0.6789520700647581, 'min_child_weight': 95, 'n_estimators': 540,
+// 'subsample': 0.8708002808590953, 'objective': 'binary:logitraw', 'max_depth': 4, 'gamma': 1.617042882325554}
 
-{"objective", "binary:logistic"},
-{"max_depth", "6"},
-{"gamma", "1.18681684221414"}
+
+
+#if 0
 #endif
 // -------------------
+// 3rd best
 // best score: 814427.55776
 // best params: {'colsample_bytree': 0.7164099207357719, 'scale_pos_weight': 0.3948607027148843,
 // 'min_child_weight': 70, 'n_estimators': 530, 'subsample': 0.7963089255980069, 'objective': 'binary:logistic',
@@ -82,68 +75,14 @@ namespace params
 {"gamma", "1.443989391942047"}
 #endif
 
-//////////////////// hyper.rank.f20.noFE.log
-// rank:pairwise
-// best score: 815135.60524
-// best params: {'n_estimators': 510, 'subsample': 0.6399543679962626, 'colsample_bytree': 0.6612120010371612,
-// 'max_depth': 7, 'min_child_weight': 135}
-// CV: 811628
-#if 0
-{"booster", "gbtree"},
-{"reg_alpha", "0"},
-{"colsample_bytree", "0.6612120010371612"},
-{"silent", "1"},
-{"colsample_bylevel", "1"},
-{"scale_pos_weight", "0.3948607027148843"},
-{"learning_rate", "0.045"},
-{"missing", "nan"},
-{"max_delta_step", "0"},
-{"base_score", "0.5"},
-{"n_estimators", "510"},
-{"subsample", "0.6399543679962626"},
-{"reg_lambda", "1"},
-{"seed", "0"},
-{"min_child_weight", "135"},
-
-{"objective", "rank:pairwise"},
-{"max_depth", "7"},
-#endif
-// ---------------
-// best score: 814001.18640
-// best params: {'n_estimators': 530, 'subsample': 0.6410812525524375, 'colsample_bytree': 0.5895782044640605,
-// 'max_depth': 7, 'min_child_weight': 135}
-// CV: 812609
-// ~~CV: 810261(600 est)
-#if 0
-{"booster", "gbtree"},
-{"reg_alpha", "0"},
-{"colsample_bytree", "0.5895782044640605"},
-{"silent", "1"},
-{"colsample_bylevel", "1"},
-{"scale_pos_weight", "0.3948607027148843"},
-{"learning_rate", "0.045"},
-{"missing", "nan"},
-{"max_delta_step", "0"},
-{"base_score", "0.5"},
-{"n_estimators", "530"},
-{"subsample", "0.6410812525524375"},
-{"reg_lambda", "1"},
-{"seed", "0"},
-{"min_child_weight", "135"},
-
-{"objective", "rank:pairwise"},
-{"max_depth", "7"},
-#endif
-
 /////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
-
 
 const std::map<const std::string, const std::string> CURRENT
 {
 //    {"booster", "gblinear"},
     {"booster", "gbtree"},
     {"reg_alpha", "0"},
-    {"colsample_bytree", "0.5235071920939005"},
+    {"colsample_bytree", "0.6612120010371612"},
     {"silent", "1"},
     {"colsample_bylevel", "1"},
     {"scale_pos_weight", "0.3948607027148843"},
@@ -151,17 +90,17 @@ const std::map<const std::string, const std::string> CURRENT
     {"missing", "nan"},
     {"max_delta_step", "0"},
     {"base_score", "0.5"},
-    {"n_estimators", "740"},
-    {"subsample", "0.5008072038378799"},
+    {"n_estimators", "510"},
+    {"subsample", "0.6399543679962626"},
     {"reg_lambda", "1"},
     {"seed", "0"},
-    {"min_child_weight", "225"},
+    {"min_child_weight", "135"},
 
     {"objective", "rank:pairwise"},
-    {"num_pairsample", "3"},
+//    {"num_pairsample", "3"},
 //    {"objective", "binary:logitraw"},
 //    {"objective", "binary:logistic"},
-    {"max_depth", "8"},
+    {"max_depth", "7"},
 //    {"gamma", "1.443989391942047"}
 };
 
@@ -268,6 +207,41 @@ const std::map<const std::string, const std::string> sub8
     {"objective", "rank:pairwise"},
     {"max_depth", "7"},
     {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub43
+{
+    // second best score: 814643.09775 from hyper.binlogistic.f10.noFE.log
+
+    // best score: 814643.09775
+    // best params: {'colsample_bytree': 0.4156165269795621, 'scale_pos_weight': 0.3959258247559913,
+    // 'min_child_weight': 55, 'n_estimators': 560, 'subsample': 0.7262267395602292, 'objective': 'binary:logistic',
+    // 'max_depth': 6, 'gamma': 1.18681684221414}
+
+    // LB: 810836.24
+    // CV: 812335
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.4156165269795621"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3959258247559913"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "560"},
+    {"subsample", "0.7262267395602292"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "55"},
+
+    {"objective", "binary:logistic"},
+    {"max_depth", "6"},
+    {"gamma", "1.18681684221414"}
 };
 
 
@@ -544,6 +518,40 @@ const std::map<const std::string, const std::string> sub12
 };
 
 
+const std::map<const std::string, const std::string> sub41
+{
+    // from hyper.rank.f20.noFE.log, best scored entry at 814001.18640
+
+    // best params: {'n_estimators': 530, 'subsample': 0.6410812525524375, 'colsample_bytree': 0.5895782044640605,
+    // 'max_depth': 7, 'min_child_weight': 135}
+    // CV: 812609
+    // ~~CV: 810261(600 est)
+
+    // LB: 806384.27
+    // CV: 812609
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5895782044640605"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3948607027148843"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "530"},
+    {"subsample", "0.6410812525524375"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "135"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
+};
+
+
 const std::map<const std::string, const std::string> sub25
 {
     // hyperopt.4.sorted.log, best ranked
@@ -605,6 +613,39 @@ const std::map<const std::string, const std::string> sub3
     {"objective", "rank:pairwise"},
     {"max_depth", "7"},
     {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub42
+{
+    // from hyper.rank.f20.noFE.log, second best scored entry at 815135.60524
+
+    // best score: 815135.60524
+    // best params: {'n_estimators': 510, 'subsample': 0.6399543679962626, 'colsample_bytree': 0.6612120010371612,
+    // 'max_depth': 7, 'min_child_weight': 135}
+
+    // LB: 805399.38
+    // CV: 811628
+    // no FE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.6612120010371612"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3948607027148843"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "510"},
+    {"subsample", "0.6399543679962626"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "135"},
+
+    {"objective", "rank:pairwise"},
+    {"max_depth", "7"},
 };
 
 

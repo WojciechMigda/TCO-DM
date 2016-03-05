@@ -569,7 +569,7 @@ DemographicMembership::predict(const int test_type,
     std::cerr << "OneHot/FE test_data shape: " << test_data.shape() << std::endl;
 
 //    const std::map<const std::string, const std::string> & PARAMS(params::CURRENT);
-    const std::map<const std::string, const std::string> & PARAMS(params::sub3);
+    const std::map<const std::string, const std::string> & PARAMS(params::sub43);
 
     constexpr int   TIME_MARGIN{60};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
