@@ -28,52 +28,6 @@
 namespace params
 {
 
-// hyper.binlogitraw.2.f10.noFE.log
-// 1.
-// best score: 814984.82934  best params: {'colsample_bytree': 0.7640052598785774,
-// 'scale_pos_weight': 0.7135239801678219, 'min_child_weight': 55, 'n_estimators': 760,
-// 'subsample': 0.5452538000685805, 'objective': 'binary:logitraw', 'max_depth': 5, 'gamma': 0.9751037278636211}
-// CV: 810875
-// 2.
-// best score: 814959.85754  best params: {'colsample_bytree': 0.8713724505384853,
-// 'scale_pos_weight': 0.682580867766655, 'min_child_weight': 85, 'n_estimators': 590,
-// 'subsample': 0.8051026646094943, 'objective': 'binary:logitraw', 'max_depth': 4, 'gamma': 1.4120960639617184}
-// CV: 812497
-// 3.
-// best score: 814591.89169  best params: {'colsample_bytree': 0.9705978190927813,
-// 'scale_pos_weight': 0.6789520700647581, 'min_child_weight': 95, 'n_estimators': 540,
-// 'subsample': 0.8708002808590953, 'objective': 'binary:logitraw', 'max_depth': 4, 'gamma': 1.617042882325554}
-// CV: 811809
-
-
-
-//#if 0
-//#endif
-
-#if 0
-const std::map<const std::string, const std::string> sub47
-{
-    {"booster", "gbtree"},
-    {"reg_alpha", "0"},
-    {"colsample_bytree", "0.9705978190927813"},
-    {"silent", "1"},
-    {"colsample_bylevel", "1"},
-    {"scale_pos_weight", "0.6789520700647581"},
-    {"learning_rate", "0.045"},
-    {"missing", "nan"},
-    {"max_delta_step", "0"},
-    {"base_score", "0.5"},
-    {"n_estimators", "540"},
-    {"subsample", "0.8708002808590953"},
-    {"reg_lambda", "1"},
-    {"seed", "0"},
-    {"min_child_weight", "95"},
-
-    {"objective", "binary:logitraw"},
-    {"max_depth", "4"},
-    {"gamma", "1.617042882325554"}
-};
-#endif
 
 /////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
 
@@ -431,6 +385,41 @@ const std::map<const std::string, const std::string> sub13
     {"objective", "rank:pairwise"},
     {"max_depth", "7"},
     {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub47
+{
+    // third best score: 814591.89169 from hyper.binlogitraw.2.f10.noFE.log
+
+    // best score: 814591.89169
+    // best params: {'colsample_bytree': 0.9705978190927813,
+    // 'scale_pos_weight': 0.6789520700647581, 'min_child_weight': 95, 'n_estimators': 540,
+    // 'subsample': 0.8708002808590953, 'objective': 'binary:logitraw', 'max_depth': 4, 'gamma': 1.617042882325554}
+
+    // LB: 809960.89
+    // CV: 811809
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.9705978190927813"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.6789520700647581"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "540"},
+    {"subsample", "0.8708002808590953"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "95"},
+
+    {"objective", "binary:logitraw"},
+    {"max_depth", "4"},
+    {"gamma", "1.617042882325554"}
 };
 
 
