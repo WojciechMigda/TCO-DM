@@ -48,32 +48,44 @@ namespace params
 #endif
 // -------------------
 // 3rd best
-// best score: 814427.55776
-// best params: {'colsample_bytree': 0.7164099207357719, 'scale_pos_weight': 0.3948607027148843,
-// 'min_child_weight': 70, 'n_estimators': 530, 'subsample': 0.7963089255980069, 'objective': 'binary:logistic',
-// 'max_depth': 4, 'gamma': 1.443989391942047}
-// CV: 813546
+// CV:
 #if 0
-{"booster", "gbtree"},
-{"reg_alpha", "0"},
-{"colsample_bytree", "0.7164099207357719"},
-{"silent", "1"},
-{"colsample_bylevel", "1"},
-{"scale_pos_weight", "0.3948607027148843"},
-{"learning_rate", "0.045"},
-{"missing", "nan"},
-{"max_delta_step", "0"},
-{"base_score", "0.5"},
-{"n_estimators", "530"},
-{"subsample", "0.7963089255980069"},
-{"reg_lambda", "1"},
-{"seed", "0"},
-{"min_child_weight", "70"},
-
-{"objective", "binary:logistic"},
-{"max_depth", "4"},
-{"gamma", "1.443989391942047"}
 #endif
+
+const std::map<const std::string, const std::string> sub44
+{
+    // 3rd best score: 814427.55776 from hyper.binlogistic.f10.noFE.log
+
+    // best score: 814427.55776
+    // best params: {'colsample_bytree': 0.7164099207357719, 'scale_pos_weight': 0.3948607027148843,
+    // 'min_child_weight': 70, 'n_estimators': 530, 'subsample': 0.7963089255980069, 'objective': 'binary:logistic',
+    // 'max_depth': 4, 'gamma': 1.443989391942047}
+
+    // LB: .
+    // CV: 813546
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.7164099207357719"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3948607027148843"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "530"},
+    {"subsample", "0.7963089255980069"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "70"},
+
+    {"objective", "binary:logistic"},
+    {"max_depth", "4"},
+    {"gamma", "1.443989391942047"}
+};
+
 
 /////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
 
