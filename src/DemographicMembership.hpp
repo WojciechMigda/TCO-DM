@@ -573,7 +573,7 @@ DemographicMembership::predict(const int test_type,
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
 
 //    const std::map<const std::string, const std::string> & PARAMS_SET[] = {params::CURRENT};
-    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub46};
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub47};
 
     ////////////////////////////////////////////////////////////////////////////
     // CV: 809750
@@ -593,6 +593,8 @@ DemographicMembership::predict(const int test_type,
     // CV: 813696
     // CV(0/1): 813998
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46};
+    // CV: 813464
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46, &params::sub43};
 
     std::cerr <<std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
     std::cerr << "Total time limit: " << TIME_LIMITS[test_type] << " secs" << std::endl;
@@ -607,7 +609,7 @@ DemographicMembership::predict(const int test_type,
         int iter{0};
 
         auto booster = XGB::fit(train_data, train_y, *PARAMS_p,
-            [&iter, &MAX_ITER, MAX_TIMESTAMP]() -> bool
+            [&iter, MAX_ITER, MAX_TIMESTAMP]() -> bool
             {
                 const bool running = (iter < MAX_ITER) && (timestamp() < MAX_TIMESTAMP);
                 ++iter;
@@ -615,9 +617,22 @@ DemographicMembership::predict(const int test_type,
             }
         );
 
-        std::cerr << iter << " / " << MAX_ITER << std::endl;
+        if (iter <= MAX_ITER)
+        {
+            // time exceeded
+            std::cerr << "Exceeded allocated time limit after iteration " << iter << " of " << MAX_ITER << " for estimator [" << y_hat_proba_set.size() + 1 << "]" << std::endl;
+
+            // but we'll make the prediction anyway if it's our first estimator :)
+            if (y_hat_proba_set.size() == 0)
+            {
+                y_hat_proba_set.push_back(XGB::predict(booster.get(), test_data));
+            }
+            break;
+        }
 
         y_hat_proba_set.push_back(XGB::predict(booster.get(), test_data));
+
+        std::cerr << "Elapsed time: " << timestamp() - time0 << std::endl;
     }
 
     // array of propabilities accumulated from completed estimators
