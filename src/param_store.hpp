@@ -31,32 +31,43 @@ namespace params
 
 /////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
 
+// best score: 814257.42870
+// best params: {'colsample_bytree': 0.5525129874711902,
+// 'scale_pos_weight': 0.38570090801277784, 'min_child_weight': 175, 'n_estimators': 510,
+// 'subsample': 0.7168114425646201, 'objective':'reg:linear', 'max_depth': 6, 'gamma': 1.676750571566339}
+
+// best score: 814251.03395
+// best params: {'colsample_bytree': 0.6683493524938185,
+// 'scale_pos_weight': 0.3821397591786267, 'min_child_weight': 215, 'n_estimators': 560,
+// 'subsample': 0.9535898735794333, 'objective': 'reg:linear', 'max_depth': 8, 'gamma': 1.6943574047322956}
+
 
 const std::map<const std::string, const std::string> CURRENT
 {
 //    {"booster", "gblinear"},
     {"booster", "gbtree"},
     {"reg_alpha", "0"},
-    {"colsample_bytree", "0.9705978190927813"},
+    {"colsample_bytree", "0.5525129874711902"},
     {"silent", "1"},
     {"colsample_bylevel", "1"},
-    {"scale_pos_weight", "0.6789520700647581"},
+    {"scale_pos_weight", "0.38570090801277784"},
     {"learning_rate", "0.045"},
     {"missing", "nan"},
     {"max_delta_step", "0"},
     {"base_score", "0.5"},
-    {"n_estimators", "540"},
-    {"subsample", "0.8708002808590953"},
+    {"n_estimators", "510"},
+    {"subsample", "0.7168114425646201"},
     {"reg_lambda", "1"},
     {"seed", "0"},
-    {"min_child_weight", "95"},
+    {"min_child_weight", "175"},
 
 //    {"objective", "rank:pairwise"},
 //    {"num_pairsample", "3"},
-    {"objective", "binary:logitraw"},
+//    {"objective", "binary:logitraw"},
+    {"objective", "reg:linear"},
 //    {"objective", "binary:logistic"},
-    {"max_depth", "4"},
-    {"gamma", "1.617042882325554"}
+    {"max_depth", "6"},
+    {"gamma", "1.676750571566339"}
 };
 
 

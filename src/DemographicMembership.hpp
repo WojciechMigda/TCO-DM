@@ -572,12 +572,13 @@ DemographicMembership::predict(const int test_type,
     constexpr int   TIME_MARGIN{60};
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
 
-//    const std::map<const std::string, const std::string> & PARAMS_SET[] = {params::CURRENT};
-    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub47};
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::CURRENT};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub47};
 
     ////////////////////////////////////////////////////////////////////////////
     // CV: 809750
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39};
+    // LB: 811543.17
     // CV: 811757
     // CV(0/1): 813376
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40};
@@ -585,18 +586,20 @@ DemographicMembership::predict(const int test_type,
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub43};
 
     //// no sub8 //////////////////////////////////////////
+    // LB: 812019.17
     // CV: 815265
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40};
     // CV: 814939
     // CV(0/1): 813603
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub43};
+    // LB: 811676.84
     // CV: 813696
     // CV(0/1): 813998
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46};
     // CV: 813464
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46, &params::sub43};
 
-    std::cerr <<std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
+    std::cerr << std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
     std::cerr << "Total time limit: " << TIME_LIMITS[test_type] << " secs" << std::endl;
 
 
