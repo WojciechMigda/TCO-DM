@@ -573,7 +573,7 @@ DemographicMembership::predict(const int test_type,
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
 
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::CURRENT};
-    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub52};
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40};
 
     ////////////////////////////////////////////////////////////////////////////
     // CV: 809750
