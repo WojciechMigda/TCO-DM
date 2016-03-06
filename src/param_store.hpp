@@ -89,7 +89,7 @@ const std::map<const std::string, const std::string> sub40
     {"colsample_bytree", "0.5235071920939005"},
     {"silent", "1"},
     {"colsample_bylevel", "1"},
-    {"scale_pos_weight", "0.3948607027148843"},
+    {"scale_pos_weight", "0.3948607027148843"}, // remove
     {"learning_rate", "0.045"},
     {"missing", "nan"},
     {"max_delta_step", "0"},

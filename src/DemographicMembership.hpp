@@ -573,31 +573,38 @@ DemographicMembership::predict(const int test_type,
     const int       MAX_TIMESTAMP = time0 + TIME_LIMITS[test_type] - TIME_MARGIN;
 
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::CURRENT};
-    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40};
 
     ////////////////////////////////////////////////////////////////////////////
     // CV: 809750
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39};
-    // LB: 811543.17
+    // LB: 811543.17 / sub# 50
     // CV: 811757
     // CV(0/1): 813376
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40};
     // CV: 812233
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub43};
+    // CV: .
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub46};
 
     //// no sub8 //////////////////////////////////////////
-    // LB: 812019.17
+    // LB: 812019.17 / sub# 48
     // CV: 815265
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39};
+    // LB: 811673.30 / sub# 54
     // CV: 814939
     // CV(0/1): 813603
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub43};
-    // LB: 811676.84
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub43};
+    // LB: 811676.84 / sub# 49
     // CV: 813696
     // CV(0/1): 813998
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46};
     // CV: 813464
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub39, &params::sub40, &params::sub46, &params::sub43};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46, &params::sub43};
+    // CV: 815199
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51};
+    // CV: 813664
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46, &params::sub51};
 
     std::cerr << std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
     std::cerr << "Total time limit: " << TIME_LIMITS[test_type] << " secs" << std::endl;
@@ -634,6 +641,11 @@ DemographicMembership::predict(const int test_type,
         }
 
         y_hat_proba_set.push_back(XGB::predict(booster.get(), test_data));
+
+        if (y_hat_proba_set.size() == 0)
+        {
+            // TODO multiply first estimator score
+        }
 
         std::cerr << "Elapsed time: " << timestamp() - time0 << std::endl;
     }
