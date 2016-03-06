@@ -44,7 +44,26 @@ KFold(const char * descriptor, int iter, const std::vector<_Tp> & df)
 
     for (std::size_t pos{0}; pos < df.size(); ++pos)
     {
-        if (descriptor[pos] - '0' == iter)
+        auto decoder = [](const char c)
+            {
+                if (std::isdigit(c))
+                {
+                    return c - '0';
+                }
+                else if (std::isupper(c))
+                {
+                    return c - 'A' + 10;
+                }
+                else if (std::islower(c))
+                {
+                    return c - 'a' + 10 + 26;
+                }
+                else
+                {
+                    assert(false);
+                }
+            };
+        if (decoder(descriptor[pos]) == iter)
         {
             te.push_back(df[pos]);
         }
