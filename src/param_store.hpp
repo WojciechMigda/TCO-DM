@@ -29,17 +29,76 @@ namespace params
 {
 
 
-/////////////////////// hyper.pairwise.f20.num_pairsample.noGamma.noFE.log
+////////////////////////// hyper.reglinear.1.f10.noFE.log
 
+// LB: 810762.72
+// CV: 813146
 // best score: 814257.42870
 // best params: {'colsample_bytree': 0.5525129874711902,
 // 'scale_pos_weight': 0.38570090801277784, 'min_child_weight': 175, 'n_estimators': 510,
 // 'subsample': 0.7168114425646201, 'objective':'reg:linear', 'max_depth': 6, 'gamma': 1.676750571566339}
 
+///////////// EXTRA ???? 'colsample_bytree': 0.9705978190927813,
+#if 0
+// LB: .
+// CV: 815894
+// best score: 814257.42870
+// best params: {'colsample_bytree': 0.9705978190927813,
+// 'scale_pos_weight': 0.38570090801277784, 'min_child_weight': 175, 'n_estimators': 510,
+// 'subsample': 0.7168114425646201, 'objective':'reg:linear', 'max_depth': 6, 'gamma': 1.676750571566339}
+#endif
+
+
+// LB: .
+// CV: 814367
 // best score: 814251.03395
 // best params: {'colsample_bytree': 0.6683493524938185,
 // 'scale_pos_weight': 0.3821397591786267, 'min_child_weight': 215, 'n_estimators': 560,
-// 'subsample': 0.9535898735794333, 'objective': 'reg:linear', 'max_depth': 8, 'gamma': 1.6943574047322956}
+// 'subsample': 0.9535898735794333, 'objective':'reg:linear', 'max_depth': 8, 'gamma': 1.6943574047322956}
+//#if 0
+//#endif
+// LB: .
+// CV: 814576
+// best score: 814088.31464
+// best params: {'colsample_bytree': 0.5774206979959366,
+// 'scale_pos_weight': 0.3837579582606276, 'min_child_weight': 215, 'n_estimators': 570,
+// 'subsample': 0.8588310863551543, 'objective':'reg:linear', 'max_depth': 7, 'gamma': 1.1270963579351068}
+//#if 0
+const std::map<const std::string, const std::string> sub53
+{
+    // third best score: 814088.31464 from hyper.reglinear.1.f10.noFE.log
+
+    // best score: 814088.31464
+    // best params: {'colsample_bytree': 0.5774206979959366,
+    // 'scale_pos_weight': 0.3837579582606276, 'min_child_weight': 215, 'n_estimators': 570,
+    // 'subsample': 0.8588310863551543, 'objective':'reg:linear', 'max_depth': 7, 'gamma': 1.1270963579351068}
+
+    // LB: .
+    // CV: 814576
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5774206979959366"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3837579582606276"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "570"},
+    {"subsample", "0.8588310863551543"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "215"},
+
+    {"objective", "reg:linear"},
+    {"max_depth", "7"},
+    {"gamma", "1.1270963579351068"}
+};
+//#endif
+
 
 
 const std::map<const std::string, const std::string> CURRENT
@@ -278,6 +337,41 @@ const std::map<const std::string, const std::string> sub33
 };
 
 
+const std::map<const std::string, const std::string> sub51
+{
+    // best score: 814257.42870 from hyper.reglinear.1.f10.noFE.log
+
+    // best score: 814257.42870
+    // best params: {'colsample_bytree': 0.5525129874711902,
+    // 'scale_pos_weight': 0.38570090801277784, 'min_child_weight': 175, 'n_estimators': 510,
+    // 'subsample': 0.7168114425646201, 'objective':'reg:linear', 'max_depth': 6, 'gamma': 1.676750571566339}
+
+    // LB: 810762.72
+    // CV: 813146
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.5525129874711902"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.38570090801277784"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "510"},
+    {"subsample", "0.7168114425646201"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "175"},
+
+    {"objective", "reg:linear"},
+    {"max_depth", "6"},
+    {"gamma", "1.676750571566339"}
+};
+
+
 const std::map<const std::string, const std::string> sub26
 {
     // sub8, n_estimators=610
@@ -396,6 +490,41 @@ const std::map<const std::string, const std::string> sub13
     {"objective", "rank:pairwise"},
     {"max_depth", "7"},
     {"gamma", "0"}
+};
+
+
+const std::map<const std::string, const std::string> sub52
+{
+    // second best score: 814251.03395 from hyper.reglinear.1.f10.noFE.log
+
+    // best score: 814251.03395
+    // best params: {'colsample_bytree': 0.6683493524938185,
+    // 'scale_pos_weight': 0.3821397591786267, 'min_child_weight': 215, 'n_estimators': 560,
+    // 'subsample': 0.9535898735794333, 'objective':'reg:linear', 'max_depth': 8, 'gamma': 1.6943574047322956}
+
+    // LB: 809993.65
+    // CV: 814367
+    // noFE
+
+    {"booster", "gbtree"},
+    {"reg_alpha", "0"},
+    {"colsample_bytree", "0.6683493524938185"},
+    {"silent", "1"},
+    {"colsample_bylevel", "1"},
+    {"scale_pos_weight", "0.3821397591786267"},
+    {"learning_rate", "0.045"},
+    {"missing", "nan"},
+    {"max_delta_step", "0"},
+    {"base_score", "0.5"},
+    {"n_estimators", "560"},
+    {"subsample", "0.9535898735794333"},
+    {"reg_lambda", "1"},
+    {"seed", "0"},
+    {"min_child_weight", "215"},
+
+    {"objective", "reg:linear"},
+    {"max_depth", "8"},
+    {"gamma", "1.6943574047322956"}
 };
 
 
