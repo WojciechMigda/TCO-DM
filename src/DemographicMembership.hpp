@@ -562,7 +562,7 @@ DemographicMembership::predict(const int test_type,
             c_full_data[full_data.rows(0, train_data.shape().first - 1)]);
         test_data = array_type(
             {test_data.shape().first, full_data.shape().second},
-            c_full_data[full_data.rows(train_data.shape().first, -1)]);
+            c_full_data[full_data.rows(train_data.shape().first, - 1)]);
     }
 
     std::cerr << "OneHot/FE train_data shape: " << train_data.shape() << std::endl;
@@ -584,27 +584,47 @@ DemographicMembership::predict(const int test_type,
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40};
     // CV: 812233
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub43};
-    // CV: .
+    // CV: 811650
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub46};
+    // CV: 812506
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub8, &params::sub39, &params::sub40, &params::sub51};
 
     //// no sub8 //////////////////////////////////////////
+
     // LB: 812019.17 / sub# 48
     // CV: 815265
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39};
+
     // LB: 811673.30 / sub# 54
     // CV: 814939
     // CV(0/1): 813603
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub43};
+
     // LB: 811676.84 / sub# 49
     // CV: 813696
     // CV(0/1): 813998
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46};
+
     // CV: 813464
 //    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46, &params::sub43};
+
+    // LB: 812424.45 / sub# 55
     // CV: 815199
     const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51};
+    // LB:
+    // CV 2x: 814959
+
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub52};
+
+
+    // LB: 812147.75
     // CV: 813664
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub46, &params::sub51};
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51, &params::sub46};
+
+    // LB: 811306.48 / sub# 57
+    // CV: 814542
+//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51, &params::sub43};
+
 
     std::cerr << std::endl << "Training " << std::distance(std::begin(PARAMS_SET), std::end(PARAMS_SET)) << " estimator(s)" << std::endl;
     std::cerr << "Total time limit: " << TIME_LIMITS[test_type] << " secs" << std::endl;
@@ -640,12 +660,14 @@ DemographicMembership::predict(const int test_type,
             break;
         }
 
-        y_hat_proba_set.push_back(XGB::predict(booster.get(), test_data));
+        auto proba = XGB::predict(booster.get(), test_data);
 
         if (y_hat_proba_set.size() == 0)
         {
-            // TODO multiply first estimator score
+            // double first estimator's score
+//            y_hat_proba_set.push_back(proba);
         }
+        y_hat_proba_set.push_back(proba);
 
         std::cerr << "Elapsed time: " << timestamp() - time0 << std::endl;
     }
