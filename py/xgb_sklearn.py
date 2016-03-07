@@ -65,7 +65,7 @@ class XGBModel(XGBModelBase):
                  nthread=-1, gamma=0, min_child_weight=1, max_delta_step=0,
                  subsample=1, colsample_bytree=1, colsample_bylevel=1,
                  reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
-                 base_score=0.5, seed=0, missing=None, num_pairsample=1):
+                 base_score=0.5, seed=0, missing=None, num_pairsample=1, booster_type='gbtree'):
         if not SKLEARN_INSTALLED:
             raise XGBoostError('sklearn needs to be installed in order to use this module')
         self.max_depth = max_depth
@@ -89,6 +89,7 @@ class XGBModel(XGBModelBase):
         self.seed = seed
         self.missing = missing if missing is not None else np.nan
         self.num_pairsample = num_pairsample
+        self.booster_type = booster_type
         self._Booster = None
 
     def __setstate__(self, state):
@@ -130,6 +131,7 @@ class XGBModel(XGBModelBase):
 
         if self.nthread <= 0:
             xgb_params.pop('nthread', None)
+        xgb_params['booster'] = self.booster_type
         return xgb_params
 
     def fit(self, X, y, eval_set=None, eval_metric=None,
@@ -260,14 +262,14 @@ class XGBClassifier(XGBModel, XGBClassifierBase):
                  nthread=-1, gamma=0, min_child_weight=1,
                  max_delta_step=0, subsample=1, colsample_bytree=1, colsample_bylevel=1,
                  reg_alpha=0, reg_lambda=1, scale_pos_weight=1,
-                 base_score=0.5, seed=0, missing=None, num_pairsample=1):
+                 base_score=0.5, seed=0, missing=None, num_pairsample=1, booster_type='gbtree'):
         super(XGBClassifier, self).__init__(max_depth, learning_rate,
                                             n_estimators, silent, objective,
                                             nthread, gamma, min_child_weight,
                                             max_delta_step, subsample,
                                             colsample_bytree, colsample_bylevel,
                                             reg_alpha, reg_lambda,
-                                            scale_pos_weight, base_score, seed, missing, num_pairsample)
+                                            scale_pos_weight, base_score, seed, missing, num_pairsample, booster_type)
 
     def fit(self, X, y, sample_weight=None, eval_set=None, eval_metric=None,
             early_stopping_rounds=None, verbose=True):
