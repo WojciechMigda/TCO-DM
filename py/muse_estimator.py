@@ -167,8 +167,8 @@ def work(estimator,
 
     train_X = OneHot(train_X, NOMINALS)
 
-    train_X['**PROP_PAGE_IMPRESSIONS_DWELL'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['TOTAL_DWELL']
-    train_X['**PROP_VOD_VIEWS_DWELL'] = train_X['VOD_VIEWS_DWELL'] / train_X['TOTAL_DWELL']
+    #train_X['**PROP_PAGE_IMPRESSIONS_DWELL'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['TOTAL_DWELL']
+    #train_X['**PROP_VOD_VIEWS_DWELL'] = train_X['VOD_VIEWS_DWELL'] / train_X['TOTAL_DWELL']
 #
 #    train_X['**FLAG_WARD_WKDAY_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKDAY_')]].sum(axis=1)
 #    train_X['**FLAG_WARD_WKEND_COUNT'] = train_X[train_X.columns[train_X.columns.str.startswith('FLAG_WARD_WKEND_')]].sum(axis=1)
@@ -179,13 +179,13 @@ def work(estimator,
 #    train_X['**AGE_35'] = train_X['AGE'] < 35
 #    train_X['**AGE_40'] = train_X['AGE'] < 40
 #    train_X['**AGE_45'] = train_X['AGE'] < 45
-    train_X['**PAGE_IMP_DWELL_PER_DAY'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['REGISTRATION_DAYS']
-    train_X['**LATE_PAGE_VIEWS_PER_DAY'] = train_X['LATE_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-    train_X['**TOTAL_DWELL_PER_DAY'] = train_X['TOTAL_DWELL'] / train_X['REGISTRATION_DAYS']
-    train_X['**AFTERNOON_PAGE_VIEWS_PER_DAY'] = train_X['AFTERNOON_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-    train_X['**PAGE_IMPRESSION_VISITS_PER_DAY'] = train_X['PAGE_IMPRESSION_VISITS'] / train_X['REGISTRATION_DAYS']
-    train_X['**LUNCHTIME_PAGE_VIEWS_PER_DAY'] = train_X['LUNCHTIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
-    train_X['**NIGHT_TIME_PAGE_VIEWS_PER_DAY'] = train_X['NIGHT_TIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    #train_X['**PAGE_IMP_DWELL_PER_DAY'] = train_X['PAGE_IMPRESSIONS_DWELL'] / train_X['REGISTRATION_DAYS']
+    #train_X['**LATE_PAGE_VIEWS_PER_DAY'] = train_X['LATE_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    #train_X['**TOTAL_DWELL_PER_DAY'] = train_X['TOTAL_DWELL'] / train_X['REGISTRATION_DAYS']
+    #train_X['**AFTERNOON_PAGE_VIEWS_PER_DAY'] = train_X['AFTERNOON_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    #train_X['**PAGE_IMPRESSION_VISITS_PER_DAY'] = train_X['PAGE_IMPRESSION_VISITS'] / train_X['REGISTRATION_DAYS']
+    #train_X['**LUNCHTIME_PAGE_VIEWS_PER_DAY'] = train_X['LUNCHTIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
+    #train_X['**NIGHT_TIME_PAGE_VIEWS_PER_DAY'] = train_X['NIGHT_TIME_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
 #    train_X['**BREAKFAST_PAGE_VIEWS_PER_DAY'] = train_X['BREAKFAST_PAGE_VIEWS'] / train_X['REGISTRATION_DAYS']
 #    train_X['**VIDEO_STOPS_PER_DAY'] = train_X['VIDEO_STOPS'] / train_X['REGISTRATION_DAYS']
 
@@ -233,7 +233,9 @@ def work(estimator,
     from sklearn.cross_validation import StratifiedKFold
     from sklearn.grid_search import GridSearchCV
 
-    if False:
+    if (False
+        #or True
+        ):
         skf = StratifiedKFold(train_y, n_folds=nfolds)
         from numpy import asarray
         selection = asarray(['-'] * len(train_y))
@@ -473,14 +475,19 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
                             verbose=2,
                             refit=False)
 
-    grid.fit(train_X, train_y)
-    print('grid scores:')
-    for item in grid.grid_scores_:
-        print('  {:s}'.format(item))
-    print('best score: {:.5f}'.format(grid.best_score_))
-    print('best params:', grid.best_params_)
+    if (False
+        #or True
+        ):
+        grid.fit(train_X, train_y)
+        print('grid scores:')
+        for item in grid.grid_scores_:
+            print('  {:s}'.format(item))
+        print('best score: {:.5f}'.format(grid.best_score_))
+        print('best params:', grid.best_params_)
 
-    if False:
+    if (False
+        #or True
+        ):
         clf.fit(train_X, train_y)
         feature_names = train_X.columns.values.tolist()
         from numpy import zeros
@@ -498,6 +505,59 @@ best params: {'colsample_bytree': 0.65, 'learning_rate': 0.045, 'min_child_weigh
             pass
         print([k for k, v in sorted_importances if v == 0])
         pass
+
+    if (False
+        or True
+        ):
+        def objective(space):
+            #param_grid = {'objective': ['binary:logistic']}
+            #param_grid = {'objective': ['binary:logitraw']}
+            param_grid = {'objective': ['rank:pairwise'], 'booster_type': ['gblinear']}
+            for k, v in space.items():
+                if k in ['n_estimators', 'max_depth', 'min_child_weight', 'num_pairwise']:
+                    v = int(v)
+                    pass
+                param_grid[k] = [v]
+                pass
+
+            grid = GridSearchCV(estimator=clf,
+                            param_grid=param_grid,
+                            cv=StratifiedKFold(train_y, n_folds=nfolds),
+                            scoring=tco_scorer,
+                            n_jobs=1,
+                            verbose=2,
+                            refit=False)
+            grid.fit(train_X, train_y)
+
+            print('best score: {:.5f}  best params: {}'.format(grid.best_score_, grid.best_params_))
+            return -grid.best_score_
+
+        from sys import path as sys_path
+        sys_path.insert(0, './hyperopt')
+        from hyperopt import fmin, tpe, hp
+
+        # cheatsheet:
+        # https://github.com/hyperopt/hyperopt/wiki/FMin#21-parameter-expressions
+        space = {
+            'n_estimators': hp.quniform("x_n_estimators", 500, 800, 10),
+            'max_depth': hp.quniform("x_max_depth", 4, 8, 1),
+            'min_child_weight': hp.quniform ('x_min_child', 45, 240, 5),
+            'gamma': hp.uniform ('x_gamma', 0.0, 2.0),
+            #'scale_pos_weight': hp.uniform ('x_scale_pos_weight', 0.5, 1.0),
+
+            'num_pairsample': hp.quniform ('x_num_pairsample', 1, 4, 1),
+
+            'subsample': hp.uniform ('x_subsample', 0.4, 1.0),
+            'colsample_bytree': hp.uniform ('x_colsample_bytree', 0.4, 1.0)
+            }
+        best = fmin(fn=objective,
+            space=space,
+            algo=tpe.suggest,
+            max_evals=100,
+            )
+        print(best)
+        pass
+
 
     return
 
