@@ -74,7 +74,7 @@ struct MinPRRegression
         CHECK(base_score > 0.0f && base_score < 1.0f)
             << "base_score must be in (0,1) for logistic loss";
 
-        return -std::log(1.0f / base_score - 1.0f);
+        return -std::log(1.0 / (double)base_score - 1.0);
     }
 
     static const char* LabelErrorMsg()

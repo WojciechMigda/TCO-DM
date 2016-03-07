@@ -20,7 +20,7 @@ namespace common {
  * \return the transformed value.
  */
 inline float Sigmoid(float x) {
-  return 1.0f / (1.0f + std::exp(-x));
+  return 1.0f / (1.0 + std::exp(-(double)x));
 }
 
 /*!
@@ -35,7 +35,7 @@ inline void Softmax(std::vector<float>* p_rec) {
   }
   double wsum = 0.0f;
   for (size_t i = 0; i < rec.size(); ++i) {
-    rec[i] = std::exp(rec[i] - wmax);
+    rec[i] = std::exp((double)rec[i] - wmax);
     wsum += rec[i];
   }
   for (size_t i = 0; i < rec.size(); ++i) {
@@ -67,9 +67,9 @@ inline Iterator FindMaxIndex(Iterator begin, Iterator end) {
  */
 inline float LogSum(float x, float y) {
   if (x < y) {
-    return y + std::log(std::exp(x - y) + 1.0f);
+    return y + std::log(std::exp((double)x - y) + 1.0);
   } else {
-    return x + std::log(std::exp(y - x) + 1.0f);
+    return x + std::log(std::exp((double)y - x) + 1.0);
   }
 }
 
@@ -88,9 +88,9 @@ inline float LogSum(Iterator begin, Iterator end) {
   }
   float sum = 0.0f;
   for (Iterator it = begin; it != end; ++it) {
-    sum += std::exp(*it - mx);
+    sum += std::exp((double)(*it) - mx);
   }
-  return mx + std::log(sum);
+  return mx + std::log((double)sum);
 }
 
 // comparator functions for sorting pairs in descending order
