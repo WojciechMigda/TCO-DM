@@ -610,11 +610,10 @@ DemographicMembership::predict(const int test_type,
 
     // LB: 812424.45 / sub# 55
     // CV: 815199
-    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51};
-    // LB:
+    //const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub51};
     // CV 2x: 814959
 
-//    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub52};
+    const std::map<const std::string, const std::string> * PARAMS_SET[] = {&params::sub40, &params::sub39, &params::sub52};
 
 
     // LB: 812147.75
