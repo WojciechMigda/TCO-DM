@@ -384,6 +384,7 @@ binary_prop(
 bool
 no_column_is_all_zeros(const num::array2d<real_type> & what)
 {
+#if 0
     const std::size_t ncols = what.shape().second;
 
     for (std::size_t idx{0}; idx < ncols; ++idx)
@@ -395,7 +396,7 @@ no_column_is_all_zeros(const num::array2d<real_type> & what)
             return false;
         }
     }
-
+#endif
     return true;
 }
 
